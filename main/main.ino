@@ -1,12 +1,15 @@
+#include <Servo.h>
+Servo Xservo;
+
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
+  Xservo.attach(9);
 }
+
 int ADvalueX;
 int ADvalueY;
 
 void loop() {
-  // put your main code here, to run repeatedly:
   ADvalueX=analogRead(A0);
   ADvalueY=analogRead(A1);
   Serial.print("X=");
@@ -14,4 +17,11 @@ void loop() {
   Serial.print(" Y=");
   Serial.println(ADvalueY);
   delay(10);
+  
+  Xservo.write(ADvalueX * .176)
+
+  //Xservo.write(0);
+  //delay(1000);
+  //Xservo.write(180);
+  //delay(1000);
 }
