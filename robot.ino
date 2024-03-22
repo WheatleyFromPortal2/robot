@@ -37,9 +37,33 @@ int Ypos;
 
 void loop() {
   ADvalueX=analogRead(A0);
-  Xpos = ADvalueX * 180.0 / 1023.0; // extra zeros to force floating point math
-  Ypos = ADvalueY * 180.0 / 1023.0;
   ADvalueY=analogRead(A1);
+  if (ADvalueX > 512) {
+    ADvalueX = ADvalueX - 512;
+    Xpos = ADvalueX * 100.0 / 512.0;
+    Motor('A', 'F', Xpos);
+  }
+  else if (ADvalueX < 512) {
+    Xpos = ADvalueX * 100.0 / 512.0;
+    Motor('A', 'R', Xpos);
+  }
+  else {
+    Motor('A', 'F', 0);
+  }
+  if (ADvalueY > 512) {
+    ADvalueY = ADvalueY - 512;
+    Ypos = ADvalueY * 100.0 / 512.0;
+    Motor('B', 'F', Ypos);
+  }
+  else if (ADvalueY < 512) {
+    Ypos = ADvalueY * 100.0 / 512.0;
+    Motor('B', 'R', Ypos);
+  }
+  else {
+    Motor('B', 'F', 0);
+  }
+  //Xpos = ADvalueX * 100.0 / 1023.0; // extra zeros to force floating point math
+  //Ypos = ADvalueY * 100.0 / 1023.0;
   Serial.print("X=");
   Serial.print(ADvalueX);
   Serial.print(" Xpos=");
@@ -47,8 +71,10 @@ void loop() {
   Serial.print(" Y=");
   Serial.println(ADvalueY);
   delay(10);  
-  Xservo.write(Xpos);
-  Yservo.write(Ypos);
+  //Xservo.write(Xpos);
+  //Yservo.write(Ypos);
+  Motor('A', 'F', Xpos);
+  Motor('B', 'F', Xpos);
 
 }
 
