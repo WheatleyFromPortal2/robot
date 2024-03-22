@@ -15,11 +15,11 @@ The shield is built to directly interface pins 10, 11, 12, 13 to the motor contr
 
 
 Since the arduino uno has hardware PWM on pins 3, 5, 6, 9, 10, 11, we can use these pins instead by bending the shield pins to the side so we can connect them manually to the arduino.
-[Ardiuno](https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/)
-[L298P Motor Driver Instructables](https://www.instructables.com/Tutorial-for-L298-2Amp-Motor-Driver-Shield-for-Ard/)
-[Electropeak Tutorial](https://electropeak.com/learn/interfacing-l298p-h-bridge-motor-driver-shield-with-arduino/)
-[Hands On Tec specs](http://www.handsontec.com/dataspecs/arduino-shield/L298P%20Motor%20Shield.pdf)
-[pdf](HandsOnTec.pdf)
+- [Ardiuno](https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/)
+- [L298P Motor Driver Instructables](https://www.instructables.com/Tutorial-for-L298-2Amp-Motor-Driver-Shield-for-Ard/)
+- [Electropeak Tutorial](https://electropeak.com/learn/interfacing-l298p-h-bridge-motor-driver-shield-with-arduino/)
+- [Hands On Tec specs](http://www.handsontec.com/dataspecs/arduino-shield/L298P%20Motor%20Shield.pdf)
+- [pdf](HandsOnTec.pdf)
 # Motor Shield Example
 ## Copied from [Proto Supplies](https://protosupplies.com/product/l298p-motor-driver-shield/)
 
