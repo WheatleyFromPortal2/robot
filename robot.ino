@@ -19,11 +19,11 @@ int payload[8];  // array to hold received data.  See transmitter code to view w
 // L298P Motor Shield Portion
 //  Motor A
 int const BUZZER = 4;
-int const ENA = 10;  
-int const INA = 12;
+int const ENA = 5;  
+int const INA = 3;
 //  Motor B
-int const ENB = 11;  
-int const INB = 13;
+int const ENB = 6;  
+int const INB = 2;
 int const MIN_SPEED = 27;   // Set to minimum PWM value that will make motors turn
 int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up or down.
 // End L298P
