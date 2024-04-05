@@ -168,8 +168,12 @@ void loop() {
 
     if (payload[3]==0) digitalWrite(4, HIGH);  //turn on buzzer
     else digitalWrite(4, LOW); // turn off buzzer
-    
-
+  // Find signal strength, maybe later assign to LED?
+  bool goodSignal = radio.testRPD();
+  if(radio.available()){
+  Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
+  radio.read(&payload,sizeof(payload));
+  }
 }
 
 /*

@@ -71,7 +71,6 @@ void setup() {
 }  // setup
 
 void loop() {
-
   payload[0] = ((analogRead(AnalogX) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[1] = ((analogRead(AnalogY) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[2] = digitalRead(ButtonA);
@@ -91,8 +90,14 @@ void loop() {
   } else {
     Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
   }
-  if (LCDinstalled) PrintToLCD();
+  // find signal strength
+  bool goodSignal = radio.testRPD();
+  if(radio.available()){
+  Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
 
+  radio.read(&payload,sizeof(payload));
+  }
+  if (LCDinstalled) PrintToLCD();
   delay(50);  // slow transmissions down by 100ms
 }
 
