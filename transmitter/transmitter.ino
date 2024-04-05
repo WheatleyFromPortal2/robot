@@ -37,6 +37,14 @@ byte RFpipe = 1;            // !!! This is the pipe used to receive data.  Choos
 int RF_CE = 9;
 int RF_CSN = 10;
 
+// Variables for recieving data from Robot, using ackData
+
+int ackData[2] = {-1, -1};
+bool newData = false;
+unsigned long currentMillis;
+unsigned long prevMillis;
+unsigned long txIntervalMillis = 1000; // send once per second
+
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
@@ -67,10 +75,10 @@ void setup() {
   radio.setPayloadSize(sizeof(payload));   // float datatype occupies 4 bytes
   radio.openWritingPipe(address[RFpipe]);  // set the transmit pipe to use
   radio.stopListening();                   // put radio in TX mode
-
 }  // setup
 
 void loop() {
+  currentMillis = millis();
   payload[0] = ((analogRead(AnalogX) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[1] = ((analogRead(AnalogY) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[2] = digitalRead(ButtonA);
@@ -79,16 +87,16 @@ void loop() {
   payload[5] = digitalRead(ButtonD);
   payload[6] = digitalRead(ButtonE);
   payload[7] = digitalRead(ButtonF);
-  bool report = radio.write(&payload, sizeof(payload));  // transmit the data and receive confirmation report
-
-  for (int x = 0; x <= 7; x++) {  // print out all the data to serial monitor
-    Serial.print(payload[x]);
-    Serial.print(" ");
+  if (currentMillis - prevMillis >= txIntervalMillis) {
+    send();
   }
-  if (report) {
-    Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
-  } else {
-    Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
+  if (newData == true) { // Print ackData and reset newData
+    Serial.println("--Acknowledge data--"):
+    Serial.println(ackData[0]);
+    Serial.println(", ");
+    Serial.println(ackData[1]);
+    Serial.println(); // Print blank newline
+    newData = false;
   }
   // find signal strength
   bool goodSignal = radio.testRPD();
@@ -99,6 +107,29 @@ void loop() {
   }
   if (LCDinstalled) PrintToLCD();
   delay(50);  // slow transmissions down by 100ms
+}
+
+void send() {
+  bool report = radio.write(&payload, sizeof(payload));  // transmit the data and receive confirmation report
+
+  for (int x = 0; x <= 7; x++) {  // print out all the data to serial monitor
+    Serial.print(payload[x]);
+    Serial.print(" ");
+  }
+  if (report) {
+    Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
+    if ( radio.isAckPayloadAvailable() ) {
+      Serial.println("ackData is available!")
+      radio.read(&ackData, sizeof(ackData));
+      newData = true;
+    }
+    else {
+      Serial.println(" Acknowledge but no ackData ")
+    }
+  } else {
+    Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
+  }
+  prevMillis = millis();
 }
 
 void SetupLCD(){

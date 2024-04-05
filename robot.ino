@@ -10,13 +10,15 @@ byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive dat
 int RF_CE=9;
 int RF_CSN = 10;
 
+const byte thisSlaveAddress[5] = {'R', 'x', 'A', 'A', 'A', 'A'};
+
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
 int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data. 
-// Motor code copied from protosupplies.com
-
-// L298P Motor Shield Portion
+int ackData[2] = {109, -4000}; // the two values to send back to the remote, just using random numbers for now
+bool newData = false;
+// L298P Motor Shield Portion, copied from https://protosupplies.com
 //  Motor A
 int const BUZZER = 4;
 int const ENA = 5;  
@@ -66,11 +68,12 @@ void setup() {
   radio.setPALevel(RF24_PA_MAX);  // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));  
   radio.openReadingPipe(1, address[RFpipe]);
+  radio.enableAckPayload(); // Enables sending data back to transmitter
   radio.startListening(); // put radio in RX mode
   printf_begin();             // needed only once for printing details
   radio.printPrettyDetails(); // (larger) function that prints human readable data
   pinMode(4, OUTPUT);
-
+  radio.writeAckPayload(1, &ackData, sizeof(ackData)); // pre-load data
   payload[0]=0;   // this code puts in default values for the payload
   payload[1]=0;
   for(int x=2; x<8; x++){
@@ -173,6 +176,12 @@ void loop() {
   if(radio.available()){
   Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
   radio.read(&payload,sizeof(payload));
+  }
+  if (bool goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
+    ackData[0] = 1
+  }
+  else {
+    ackData[0] = 0
   }
 }
 
