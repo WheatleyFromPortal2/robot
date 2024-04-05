@@ -53,7 +53,8 @@ int payload[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 long unsigned int TimeNow;
 long unsigned int TimeNext;
-
+long unsigned int successfulTx;
+long unsigned int failedTx;
 void setup() {
 
   Serial.begin(115200);
@@ -118,6 +119,7 @@ void send() {
   }
   if (report) {
     Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
+    successfulTx += 1 // Add one to value of successfulTx, since the transmission succeeded
     if ( radio.isAckPayloadAvailable() ) {
       Serial.println("ackData is available!")
       radio.read(&ackData, sizeof(ackData));
@@ -128,6 +130,7 @@ void send() {
     }
   } else {
     Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
+    failedTx += 1 // Add one to value of failedTx, since the transmission failed
   }
   prevMillis = millis();
 }
