@@ -32,7 +32,7 @@ int ButtonF = 7;
 
 // RF24 settings and IO pin assignments
 byte ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
-byte RFpipe = 0;            // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
+byte RFpipe = 1;            // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 
 int RF_CE = 9;
 int RF_CSN = 10;

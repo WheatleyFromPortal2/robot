@@ -5,10 +5,32 @@
 - Hamzah Salman
 - Hunter Dorrill
 # Hardware
-- Arduino Uno (or compatable clone)
+- 2 Arduino Unos (or compatable clones)
 - [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
 - 9g Micro Servo (IO Pin 9)
-# Fundiuno Schematic
+# Transmitter
+- Uses Fundiuno Shield
+- Uses same RF24 Module
+## Pin Assignments
+- Joystick X = `A0`
+- Joystick Y =`A1`
+- Button A = `2`
+- Button B = `3`
+- Button C = `4`
+- Button D = `5`
+- Button E = `6`
+- Button F = `7`
+## Payload Characteristics
+- Uses an array with **8** elements, numbered 0-7
+0. Value of Joystick X from -100 to 100
+1. Value of Joystick Y from -100 to 100
+2. Value of Button A
+3. Value of Button B
+4. Value of Button C
+5. Value of Button D
+6. Value of Button E
+7. Value of Button F
+## Fundiuno Schematic
 ![schematic from cb-electronics.com](schematic.png)
 # Motor Shield Docs
 The shield is built to directly interface pins 10, 11, 12, 13 to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module so we must use different motor control pins.
