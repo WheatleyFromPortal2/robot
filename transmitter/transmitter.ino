@@ -14,9 +14,17 @@ I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 
 #include <SPI.h>  // (SPI bus uses hardware IO pins 11, 12, 13)
 #include <printf.h>
+#include <string.h>
 #include <RF24.h>
 
 #include <LCD_I2C.h>     // include library, more info at https://github.com/blackhack/LCD_I2C
+#include <Adafruit_GFX.h> // include library for 0.96" OLED display
+#include <Adafruit_SSD1306.h>  // code copied from https://electropeak.com/learn/interfacing-0-96-inch-ssd1306-oled-i2c-display-with-arduino/
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display heigh, in pixels
+#define OLED_RESET 4 // Reset pin # (or -1 if sharing Arduino reset pin)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // Declare display
+
 LCD_I2C MyLCD(0x27);     // create object called MyLCD and set default address of most PCF8574 modules
 bool LCDinstalled = false; // if LCD installed, make this true
 
@@ -37,6 +45,7 @@ byte RFpipe = 1;            // !!! This is the pipe used to receive data.  Choos
 int RF_CE = 9;
 int RF_CSN = 10;
 
+String buf = String(ChannelFrequency);
 // Variables for recieving data from Robot, using ackData
 
 int ackData[2] = {-1, -1};
@@ -55,11 +64,17 @@ long unsigned int TimeNow;
 long unsigned int TimeNext;
 long unsigned int successfulTx;
 long unsigned int failedTx;
+int txPercent;
+bool goodSignal;
 void setup() {
 
   Serial.begin(115200);
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
+  }
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
+    Serial.println(F("SSD1306 allocation failed, reboot Ardiuno to fix, or check I2C connection"));
+    for(;;); // Don't proceed, loop forever
   }
   Serial.print("ChannelFrequency=");
   Serial.println(ChannelFrequency);
@@ -100,7 +115,7 @@ void loop() {
     newData = false;
   }
   // find signal strength
-  bool goodSignal = radio.testRPD();
+  goodSignal = radio.testRPD();
   if(radio.available()){
   Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
 
@@ -119,7 +134,7 @@ void send() {
   }
   if (report) {
     Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
-    successfulTx += 1; // Add one to value of successfulTx, since the transmission succeeded
+    successfulTx ++; // Add one to value of successfulTx, since the transmission succeeded
     if ( radio.isAckPayloadAvailable() ) {
       Serial.println("ackData is available!");
       radio.read(&ackData, sizeof(ackData));
@@ -130,29 +145,59 @@ void send() {
     }
   } else {
     Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
-    failedTx += 1; // Add one to value of failedTx, since the transmission failed
+    failedTx ++ ; // Add one to value of failedTx, since the transmission failed
   }
   prevMillis = millis();
 }
 
-void SetupLCD(){
-    MyLCD.begin();          // initialize the display
-    MyLCD.backlight();      // start the backlight
-    MyLCD.clear();          // clear the screen
-    MyLCD.setCursor(0, 0);  // set cursor position .setCursor(column 0-15, row 0-1)
-    MyLCD.print("Chan:");   // print to the screen at the cursor position
-    MyLCD.print(ChannelFrequency);
-    MyLCD.print(" Pipe:");  // print to the screen at the cursor position
-    MyLCD.print(RFpipe);
+void SetupLCD(){ // Initializes display, YOU MUST CALL "display.display();" AFTER MAKING CHANGES TO UPDATE THE DISPLAY!
+  display.display();
+  delay(1000); // Pause for 1 second (maybe try lower value later?)
+  display.clearDisplay();
+  display.setTextSize(1); // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0); // Start at top-left corner
+  display.cp437(true); // Use full 256 char 'Code Page 437' font
+  // ---Boot-Message---
+  buf = String(ChannelFrequency);
+  display.println("rfFreq: ");
+  display.print(buf); // Prints the frequency
+  buf = String(RFpipe);
+  display.println("rfPipe: ");
+  display.print(buf); // Prints the rfPipe
+  buf = String(txIntervalMillis);
+  display.println("txIntervalMillis: ");
+  display.print(buf);
+  display.display();
+  delay(1000); // delay 1second (Maybe lower later?)
 }
 
 void PrintToLCD() {
-  MyLCD.setCursor(0, 1);
-  MyLCD.print(payload[0]);
-  MyLCD.print("    ");
-  MyLCD.setCursor(5, 1);
-  MyLCD.print(payload[1]);
-  MyLCD.print("    ");
-  MyLCD.setCursor(10, 1);
-  for (int x = 2; x <= 7; x++) MyLCD.print(payload[x]);
+  txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.println("Packet: ");
+  for (int x = 0; x <= 7; x++) { // Print out payload to OLED
+    buf = String(payload[x]);
+    display.print(buf);
+    display.print(" ");
+  }
+  buf = String(successfulTx);
+  display.println("Tx: ");
+  display.print(buf);
+  display.print("/");
+  buf = String(failedTx);
+  display.print(buf);
+  display.print(", ");
+  buf = String(txPercent);
+  display.print(buf);
+  display.print("%");
+  if (goodSignal) {
+    display.println("Signal Good!");
+    display.invertDisplay(false); // Does not invert display if the signal is good
+  }
+  else {
+    display.println("Signal Bad!");
+    display.invertDisplay(true); // Inverts entire display if signal is bad
+  }
 }
