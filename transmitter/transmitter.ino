@@ -17,15 +17,15 @@ I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 #include <string.h>
 #include <RF24.h>
 
-#include <LCD_I2C.h>     // include library, more info at https://github.com/blackhack/LCD_I2C
+// #include <LCD_I2C.h>     // include library, more info at https://github.com/blackhack/LCD_I2C
 #include <Adafruit_GFX.h> // include library for 0.96" OLED display
 #include <Adafruit_SSD1306.h>  // code copied from https://electropeak.com/learn/interfacing-0-96-inch-ssd1306-oled-i2c-display-with-arduino/
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display heigh, in pixels
 #define OLED_RESET 4 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SSD1306_NO_SPLASH // Disable OLED splash-screen
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // Declare display
 
-LCD_I2C MyLCD(0x27);     // create object called MyLCD and set default address of most PCF8574 modules
 bool LCDinstalled = false; // if LCD installed, make this true
 
 // io pin assignments for joystick shield
@@ -74,7 +74,7 @@ void setup() {
   }
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
     Serial.println(F("SSD1306 allocation failed, reboot Ardiuno to fix, or check I2C connection"));
-    for(;;); // Don't proceed, loop forever
+    for(;;); // hold in infinite loop
   }
   Serial.print("ChannelFrequency=");
   Serial.println(ChannelFrequency);
@@ -84,7 +84,7 @@ void setup() {
 
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding.  Please reset."));
-    while (1) {}  // hold in infinite loop
+    for(;;);  // hold in infinite loop
   }
   radio.setChannel(ChannelFrequency);      // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default.
@@ -176,11 +176,11 @@ void PrintToLCD() {
   txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
   display.clearDisplay();
   display.setCursor(0,0);
-  display.println("Packet: ");
+  display.println("Pkt:");
   for (int x = 0; x <= 7; x++) { // Print out payload to OLED
     buf = String(payload[x]);
-    display.print(buf);
     display.print(" ");
+    display.print(buf);
   }
   buf = String(successfulTx);
   display.println("Tx: ");
@@ -192,12 +192,18 @@ void PrintToLCD() {
   buf = String(txPercent);
   display.print(buf);
   display.print("%");
+  display.println("ackData:");
+  for (int x = 0; x <= 1; x++) { // Print out ackData to OLED
+    buf = ackData[x];
+    display.print(" ");
+    display.print(buf);
+  }
   if (goodSignal) {
-    display.println("Signal Good!");
-    display.invertDisplay(false); // Does not invert display if the signal is good
+    display.println("Signal Good! (>-64dBm");
+    display.invertDisplay(false); // Don't invert display if the signal is good
   }
   else {
-    display.println("Signal Bad!");
+    display.println("Signal Bad! (<-64dBm");
     display.invertDisplay(true); // Inverts entire display if signal is bad
   }
 }
