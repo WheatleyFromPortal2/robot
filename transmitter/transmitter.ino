@@ -57,12 +57,12 @@ RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
 
 int payload[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
 long unsigned int TimeNow;
 long unsigned int TimeNext;
 long unsigned int successfulTx;
 long unsigned int failedTx;
 int txPercent;
+int vScreen;
 bool goodSignal;
 void setup() {
 
@@ -173,37 +173,39 @@ void SetupLCD(){ // Initializes display, YOU MUST CALL "display.display();" AFTE
 void PrintToLCD() {
   gfxTime = millis();
   txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.println("Pkt:");
-  for (int x = 0; x <= 7; x++) { // Print out payload to OLED
-    buf = String(payload[x]);
-    display.print(" ");
+  if (vScreen == 0){ // Prints the default screen, add more else-ifs for more screens!
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println("Pkt:");
+    for (int x = 0; x <= 7; x++) { // Print out payload to OLED
+      buf = String(payload[x]);
+      display.print(" ");
+      display.print(buf);
+    }
+    buf = String(successfulTx);
+    display.println("Tx: ");
     display.print(buf);
-  }
-  buf = String(successfulTx);
-  display.println("Tx: ");
-  display.print(buf);
-  display.print("/");
-  buf = String(failedTx);
-  display.print(buf);
-  display.print(", ");
-  buf = String(txPercent);
-  display.print(buf);
-  display.print("%");
-  display.println("ackData:");
-  for (int x = 0; x <= 1; x++) { // Print out ackData to OLED
-    buf = ackData[x];
-    display.print(" ");
+    display.print("/");
+    buf = String(failedTx);
     display.print(buf);
-  }
-  if (goodSignal) {
-    display.println("Signal Good! (>-64dBm");
-    display.invertDisplay(false); // Don't invert display if the signal is good
-  }
-  else {
-    display.println("Signal Bad! (<-64dBm");
-    display.invertDisplay(true); // Inverts entire display if signal is bad
+    display.print(", ");
+    buf = String(txPercent);
+    display.print(buf);
+    display.print("%");
+    display.println("ackData:");
+    for (int x = 0; x <= 1; x++) { // Print out ackData to OLED
+      buf = ackData[x];
+      display.print(" ");
+      display.print(buf);
+    }
+    if (goodSignal) {
+      display.println("Signal Good! (>-64dBm");
+      display.invertDisplay(false); // Don't invert display if the signal is good
+    }
+    else {
+      display.println("Signal Bad! (<-64dBm");
+      display.invertDisplay(true); // Inverts entire display if signal is bad
+    }
   }
   gfxTime = millis() - gfxTime;
   Serial.println("gfxTime: ");
