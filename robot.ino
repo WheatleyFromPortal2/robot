@@ -187,6 +187,7 @@ void loop() {
   else {
     ackData[0] = 0;
   }
+   radio.writeAckPayload(1, &ackData, sizeof(ackData)); // load the payload for the next time
 }
 
 /*
