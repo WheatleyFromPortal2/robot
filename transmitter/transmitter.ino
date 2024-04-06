@@ -53,7 +53,7 @@ bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
 unsigned long txIntervalMillis = 1000; // send once per second
-
+unsigned long gfxTime
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
@@ -122,7 +122,7 @@ void loop() {
   radio.read(&payload,sizeof(payload));
   }
   if (LCDinstalled) PrintToLCD();
-  delay(50);  // slow transmissions down by 100ms
+  delay(50 - gfxTime);  // slow transmissions down by 50ms, accounting for time it takes to render to the display
 }
 
 void send() {
@@ -173,6 +173,7 @@ void SetupLCD(){ // Initializes display, YOU MUST CALL "display.display();" AFTE
 }
 
 void PrintToLCD() {
+  gfxTime = millis()
   txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
   display.clearDisplay();
   display.setCursor(0,0);
@@ -206,4 +207,5 @@ void PrintToLCD() {
     display.println("Signal Bad! (<-64dBm");
     display.invertDisplay(true); // Inverts entire display if signal is bad
   }
+  gfxTime = millis() - gfxTime
 }
