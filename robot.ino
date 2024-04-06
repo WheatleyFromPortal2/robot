@@ -25,7 +25,7 @@ int const INA = 3;
 //  Motor B
 int const ENB = 6;  
 int const INB = 2;
-int const MIN_SPEED = 27;   // Set to minimum PWM value that will make motors turn
+int const MIN_SPEED = 10;   // Set to minimum PWM value that will make motors turn
 int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up or down.
 // End L298P
 /*
