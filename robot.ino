@@ -9,8 +9,7 @@ byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive dat
 
 int RF_CE=9;
 int RF_CSN = 10;
-
-const byte thisSlaveAddress[5] = {'R', 'x', 'A', 'A', 'A', 'A'};
+const byte thisSlaveAddress[] = {'R', 'x', 'A', 'A', 'A', 'A'};
 
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
@@ -177,11 +176,11 @@ void loop() {
   Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
   radio.read(&payload,sizeof(payload));
   }
-  if (bool goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
-    ackData[0] = 1
+  if (goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
+    ackData[0] = 1;
   }
   else {
-    ackData[0] = 0
+    ackData[0] = 0;
   }
 }
 

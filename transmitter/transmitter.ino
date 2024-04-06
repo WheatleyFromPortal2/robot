@@ -92,7 +92,7 @@ void loop() {
     send();
   }
   if (newData == true) { // Print ackData and reset newData
-    Serial.println("--Acknowledge data--"):
+    Serial.println("--Acknowledge data--");
     Serial.println(ackData[0]);
     Serial.println(", ");
     Serial.println(ackData[1]);
@@ -119,18 +119,18 @@ void send() {
   }
   if (report) {
     Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
-    successfulTx += 1 // Add one to value of successfulTx, since the transmission succeeded
+    successfulTx += 1; // Add one to value of successfulTx, since the transmission succeeded
     if ( radio.isAckPayloadAvailable() ) {
-      Serial.println("ackData is available!")
+      Serial.println("ackData is available!");
       radio.read(&ackData, sizeof(ackData));
       newData = true;
     }
     else {
-      Serial.println(" Acknowledge but no ackData ")
+      Serial.println(" Acknowledge but no ackData ");
     }
   } else {
     Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
-    failedTx += 1 // Add one to value of failedTx, since the transmission failed
+    failedTx += 1; // Add one to value of failedTx, since the transmission failed
   }
   prevMillis = millis();
 }
