@@ -14,15 +14,13 @@ I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 
 #include <SPI.h>  // (SPI bus uses hardware IO pins 11, 12, 13)
 #include <printf.h>
-#include <string.h>
 #include <RF24.h>
-
 // #include <LCD_I2C.h>     // include library, more info at https://github.com/blackhack/LCD_I2C
 #include <Adafruit_GFX.h> // include library for 0.96" OLED display
 #include <Adafruit_SSD1306.h>  // code copied from https://electropeak.com/learn/interfacing-0-96-inch-ssd1306-oled-i2c-display-with-arduino/
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display heigh, in pixels
-#define OLED_RESET 4 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SSD1306_NO_SPLASH // Disable OLED splash-screen
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // Declare display
 
@@ -53,7 +51,7 @@ bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
 unsigned long txIntervalMillis = 1000; // send once per second
-unsigned long gfxTime
+unsigned long gfxTime;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
@@ -169,11 +167,11 @@ void SetupLCD(){ // Initializes display, YOU MUST CALL "display.display();" AFTE
   display.println("txIntervalMillis: ");
   display.print(buf);
   display.display();
-  delay(1000); // delay 1second (Maybe lower later?)
+  delay(1000); // delay 1 second (Maybe lower later?)
 }
 
 void PrintToLCD() {
-  gfxTime = millis()
+  gfxTime = millis();
   txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
   display.clearDisplay();
   display.setCursor(0,0);
@@ -207,5 +205,7 @@ void PrintToLCD() {
     display.println("Signal Bad! (<-64dBm");
     display.invertDisplay(true); // Inverts entire display if signal is bad
   }
-  gfxTime = millis() - gfxTime
+  gfxTime = millis() - gfxTime;
+  Serial.println("gfxTime: ");
+  Serial.print(gfxTime);
 }
