@@ -42,7 +42,7 @@ int M2speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor
 // Hobby Servo io pin assignments
 int Svo1pin = A0;
 Servo Servo1; // create instance of servo
-
+int mSpeed;
 int retry=0;
 
 void setup() {
@@ -121,46 +121,51 @@ void loop() {
       }
       delay(50);
     }
-
-    if (payload[1]>50){
-       /*digitalWrite(M1dirPin,HIGH);
-       digitalWrite(M2dirPin,LOW);
-       analogWrite(M1pwmPin, M1speed);
-       analogWrite(M2pwmPin, M2speed); */
-       Motor('A', 'F', payload); // Set Motor A to go forward and speed of payload
-       Motor('B', 'R', payload); // Set Motor B to go reverse and speed of payload
-       
-    }
-    else if (payload[1]< -50){
-       /*digitalWrite(M1dirPin,LOW);
-       digitalWrite(M2dirPin,HIGH);
-       analogWrite(M1pwmPin, M1speed);
-       analogWrite(M2pwmPin, M2speed); */
-       Motor('A', 'F', payload); // Set Motor A to forward and speed of payload
-       Motor('B', 'R', payload); // Set Motor B to reverse and speed of payload
-    }
-    else if (payload[0]> 50){
-       /*digitalWrite(M1dirPin,LOW);
-       digitalWrite(M2dirPin,LOW);
-       analogWrite(M1pwmPin, M1speed);
-       analogWrite(M2pwmPin, M2speed); */
-       Motor('A', 'R', payload);
-       Motor('B', 'R', payload);
-    }
-    else if (payload[0]< -50){
-       /*digitalWrite(M1dirPin,HIGH);
-       digitalWrite(M2dirPin,HIGH);
-       analogWrite(M1pwmPin, M1speed);
-       analogWrite(M2pwmPin, M2speed);*/
-       Motor('A', 'F', payload);
-       Motor('B', 'F', payload);
-    }
-    else {
-       /*analogWrite(M1pwmPin, 0);  //pwm value of 0 is stopped
-       analogWrite(M2pwmPin, 0);  //pwm value of 0 is stopped*/
-       Motor('A', 'F', 0); // "0" is to set motor to stop
-       Motor('B', 'F', 0); // "0" is to set motor to stop
-    }
+        if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
+          mSpeed = payload[1] * 2.55;
+        }
+        else {
+          mSpeed = payload[1];
+        }
+        if (payload[1]>10){
+         /*digitalWrite(M1dirPin,HIGH);
+         digitalWrite(M2dirPin,LOW);
+         analogWrite(M1pwmPin, M1speed);
+         analogWrite(M2pwmPin, M2speed); */
+         Motor('A', 'F', mSpeed); // Set Motor A to go forward and speed of payload
+         Motor('B', 'R', mSpeed); // Set Motor B to go reverse and speed of payload
+         
+      }
+      else if (payload[1]< -10){
+         /*digitalWrite(M1dirPin,LOW);
+         digitalWrite(M2dirPin,HIGH);
+         analogWrite(M1pwmPin, M1speed);
+         analogWrite(M2pwmPin, M2speed); */
+         Motor('A', 'F', mSpeed); // Set Motor A to forward and speed of payload
+         Motor('B', 'R', mSpeed); // Set Motor B to reverse and speed of payload
+      }
+      else if (payload[0]> 10){
+         /*digitalWrite(M1dirPin,LOW);
+         digitalWrite(M2dirPin,LOW);
+         analogWrite(M1pwmPin, M1speed);
+         analogWrite(M2pwmPin, M2speed); */
+         Motor('A', 'R', mSpeed);
+         Motor('B', 'R', mSpeed);
+      }
+      else if (payload[0]< -10){
+         /*digitalWrite(M1dirPin,HIGH);
+         digitalWrite(M2dirPin,HIGH);
+         analogWrite(M1pwmPin, M1speed);
+         analogWrite(M2pwmPin, M2speed);*/
+         Motor('A', 'F', mSpeed);
+         Motor('B', 'F', mSpeed);
+      }
+      else {
+         /*analogWrite(M1pwmPin, 0);  //pwm value of 0 is stopped
+         analogWrite(M2pwmPin, 0);  //pwm value of 0 is stopped*/
+         Motor('A', 'F', 0); // "0" is to set motor to stop
+         Motor('B', 'F', 0); // "0" is to set motor to stop
+     }
 
 
     // These last lines show how to make hobby servo go to a position when button press is received
