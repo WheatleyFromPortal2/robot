@@ -7,10 +7,14 @@
 byte ChannelFrequency = 24; //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
 byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 
-int RF_CE=9;
-int RF_CSN = 10;
+int const RF_CE=9;
+int const RF_CSN = 10;
+int const trigger = 8; // specify pin used to trigger distance sensors, connect this to all of them
 const byte thisSlaveAddress[] = {'R', 'x', 'A', 'A', 'A', 'A'};
-
+int const x1Pin = A0; // Pin for leftmost distance sensor echo
+int const x2Pin = A1; // Pin for middle distance sensor echo
+int const x3Pin = A2; // Pin for rightmost distance sensor echo
+long pulseDuration;
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
@@ -40,8 +44,8 @@ int M1speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor
 int M2speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor, value of 0-255
 */
 // Hobby Servo io pin assignments
-int Svo1pin = A0; // (A0 = pin14)
-int Svo2pin = A1; // (A1 = pin15)
+int const Svo1pin = A0; // (A0 = pin14)
+int const Svo2pin = 7;
 Servo Servo1; // create instance of servo
 Servo Servo2; // create instance of servo
 int mSpeed;
@@ -55,7 +59,10 @@ void setup() {
   pinMode(INB, OUTPUT);
   pinMode(BUZZER, OUTPUT);
   // End 298P Portion
-
+  pinMode(trigger, OUTPUT);
+  pinMode(x1Pin, INPUT);
+  pinMode(x2Pin, INPUT);
+  pinMode(x3Pin, INPUT);
   Servo1.attach(Svo1pin);
   Serial.begin(115200);
   while (!Serial) {
@@ -75,17 +82,27 @@ void setup() {
   radio.printPrettyDetails(); // (larger) function that prints human readable data
   pinMode(4, OUTPUT);
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // pre-load data
-  payload[0]=0;   // this code puts in default values for the payload
-  payload[1]=0;
-  for(int x=2; x<8; x++){
-    payload[x]=1;
-  }
-
-  
-  } 
+}
 
 void(* resetFunc) (void) = 0;//declare reset function at address 0
 
+void distances(){ // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
+  digitalWrite(trigger, HIGH); // trigger the HC-SR04s
+  delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
+  digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
+  pulseDuration = pulseIn(x1Pin, HIGH); // find time of pulse for x1
+  ackData[2] = pulseDuration * 0.0171; // find distance in cm for x1
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  pulseDuration = pulseIn(x2Pin, HIGH); // find time of pulse for x2
+  ackData[3] = pulseDuration * 0.0171; // find distance in cm for x2
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  pulseDuration = pulseIn(x3Pin, HIGH);
+  ackData[4] = pulseDuration * 0.0171;
+}
 
 void loop() {
   
@@ -192,6 +209,7 @@ void loop() {
     ackData[7] = 0;
   }
    radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
+   distances(); // get fresh distance values, this may take a second, so we do it after sending the ackData
 }
 
 /*
@@ -206,18 +224,18 @@ void Motor(char mot, char dir, int speed)
 {
   if (speed > 0){ // Update ackData payload with motor speed
     if (mot == 'A'){
-      ackData[0] = speed
+      ackData[0] = speed;
     }
     else if (mot = 'B'){
-      ackData[1] = speed
+      ackData[1] = speed;
     }
   }
   else if (speed < 0){
     if (mot == 'A'){
-      ackData[0] = speed * -1
+      ackData[0] = speed * -1;
     }
     else if (mot == 'B'){
-      ackData[1] = speed * -1
+      ackData[1] = speed * -1;
     }
   }
   // remap the speed from range 0-100 to 0-255
