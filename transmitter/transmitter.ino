@@ -149,11 +149,36 @@ void PrintToLCD() {
   gfxTime = millis();
   txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
 
-  if (vScreen == 0){ // payload vScreen
-    
+  if (vScreen == 0){ // Raw Data vScreen
+  u8g2.setFont(u8g2_font_profont10_mf);
+    u8g2.clearDisplay();
+    u8g2.setCursor(0,0);
+    u8g2.print("Payload: {"); // Print payload
+    for (int i = 0; i<=7; i++){
+      u8g2.print(payload[i]);
+      u8g2.print(" ");
+    }
+    u8g2.print("}");
+    u8g2.println("ackData: {"); // Print ackData
+    for (int i = 0; i<=7; i++){
+      u8g2.print(ackData[i]);
+      u8g2.print(" ");
+    }
+    u8g2.println("Tx Suc/Fail: ");// Print Tx Success/Fail and percent
+    u8g2.print(successfulTx);
+    u8g2.print("/");
+    u8g2.print(failedTx);
+    u8g2.print(" ");
+    u8g2.print(txPercent);
+    u8g2.print("%");
+    if (goodSignal){
+      u8g2.println("Good Signal!");
+    }
+    else {u8g2.println("Bad Signal");}
   }
   else if (vScreen == 1){
   // this displays the proximity data
+    u8g2.clearDisplay();
     u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
     u8g2.setFont(u8g2_font_profont11_mf);
     u8g2.setCursor(0, 7);
@@ -176,6 +201,7 @@ void PrintToLCD() {
   }
    else if (vScreen==2){
      // this displays a bar graph (most likely motor speed)//*
+     u8g2.clearDisplay();
      int graphH1= ackData[0]*.48;
      int graphH2= ackData[1]* .48;
      u8g2.drawFrame(0, 12, 12, 52); 
