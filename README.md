@@ -24,14 +24,14 @@
 - Button F = `7`
 ## Payload Characteristics
 ### Uses an array with **8** elements, numbered 0-7
-0. Value of Joystick X from -100 to 100
-1. Value of Joystick Y from -100 to 100
-2. Value of Button A
-3. Value of Button B
-4. Value of Button C
-5. Value of Button D
-6. Value of Button E
-7. Value of Button F
+0. Value of `Joystick X` from -100 to 100
+1. Value of `Joystick Y` from -100 to 100
+2. Value of `Button A`
+3. Value of `Button B`
+4. Value of `Button C`
+5. Value of `Button D`
+6. Value of `Button E`
+7. Value of `Button F`
 ## ackData Characteristics, used for sending data back to transmitter
 ### Uses an array of **8** elements, numbered 0-7
 0. `motorA` Motor A power percen t (0-100)
