@@ -122,7 +122,7 @@ void loop() {
       delay(50);
     }
         if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
-          mSpeed = payload[1] * 2.55;
+          mSpeed = payload[1] / 2.0; // If the button isn't pressed, make is slower
         }
         else {
           mSpeed = payload[1];
@@ -181,11 +181,13 @@ void loop() {
   Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
   radio.read(&payload,sizeof(payload));
   }
+  // ---Get ackData values from hardware---
+
   if (goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
-    ackData[0] = 1;
+    ackData[7] = 1;
   }
   else {
-    ackData[0] = 0;
+    ackData[7] = 0;
   }
    radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
 }
@@ -200,6 +202,22 @@ void loop() {
  */
 void Motor(char mot, char dir, int speed)
 {
+  if (speed > 0){ // Update ackData payload with motor speed
+    if (mot == 'A'){
+      ackData[0] = speed
+    }
+    else if (mot = 'B'){
+      ackData[1] = speed
+    }
+  }
+  else if (speed < 0){
+    if (mot == 'A'){
+      ackData[0] = speed * -1
+    }
+    else if (mot == 'B'){
+      ackData[1] = speed * -1
+    }
+  }
   // remap the speed from range 0-100 to 0-255
   int newspeed;
   if (speed == 0)
