@@ -30,6 +30,16 @@
 5. Value of Button D
 6. Value of Button E
 7. Value of Button F
+## ackData Characteristics, used for sending data back to transmitter
+- Uses an array of **8** elements, numbered 0-7
+0. `motorA` Motor A power percent (0-100)
+1. `motorB` Motor B power percent (0-100)
+2. `x1` Distance value for leftmost distance sensor (centimeters)
+3. `x2` Distance value for middle distance sensor (centimeters)
+4. `x3` Distance value for rightmost distance sensor (centimeters)
+5. `servo1` Rotation of leftmost servo (degrees)
+6. `servo2` Rotation of rightmost servo (degrees)
+7. `ackConnect` Value of connection quality from robot (0-1)
 ## Fundiuno Schematic
 ![schematic from cb-electronics.com](schematic.png)
 # Motor Shield Docs
