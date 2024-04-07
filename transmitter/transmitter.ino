@@ -69,6 +69,10 @@ void setup() {
   Serial.print("RFpipe=");
   Serial.println(RFpipe);
   u8g2.begin(); // Enables U8g2 display
+  u8g2.print("Freq:");
+  u8g2.print(ChannelFrequency);
+  u8g2.println("RFpipe: ")
+  u8g2.print(RFpipe);
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding.  Please reset."));
     for(;;);  // hold in infinite loop
