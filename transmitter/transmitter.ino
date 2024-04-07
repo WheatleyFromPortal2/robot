@@ -8,7 +8,7 @@ Note that the serial monitor should be set to 115200bps to monitor the serial.pr
 You need to install the library titled "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
 You need to install the library titled "LCD_I2C" from the library manager. "LCD_I2C" by "Blackhack"
 
-v2.2 adds I2C LCD display for 16x2 LCD using I2C controller board.  Requires "LCD_I2C" library by "Blackhack".
+v2.2 adds I2C LCD display for 16ackData[3] LCD using I2C controller board.  Requires "LCD_I2C" library by "Blackhack".
 I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 */
 
@@ -19,13 +19,13 @@ I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 #include <U8g2lib.h>
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2); // define OLED display
 // ---Varaibles needed to be transmitted by the Robot--- (U8g2 display)
-int motorA=28;
-int motorB=67;
-int x1=10; // distance values from distance sensors. x1-x3
-int x2=20;
-int x3=30; 
-int servo1=20;
-int servo2 =160;
+int ackData[0]=28;
+int ackData[1]=67;
+int ackData[2]=10; // distance values from distance sensors. ackData[2]-ackData[4]
+int ackData[3]=20;
+int ackData[4]=30; 
+int ackData[5]=20;
+int ackData[6] =160;
 // ___end of varibles tranmittted by robot___
 /* ---Code for old Ardafruit Display---
 //#include <Adafruit_GFX.h> // include library for 0.96" OLED display
@@ -85,7 +85,7 @@ void setup() {
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
   }
-  /*if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
+  /*if(!display.begin(SSD1306_SWITCHCAPVCC, 0ackData[4]C)) { // Address 0ackData[4]C for 128ackData[4]2
     Serial.println(F("SSD1306 allocation failed, reboot Ardiuno to fix, or check I2C connection"));
     for(;;); // hold in infinite loop
   }*/ // Old display code
@@ -235,27 +235,27 @@ void PrintToLCD() {
      u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
      u8g2.setFont(u8g2_font_profont11_mf);
      u8g2.setCursor(0, 7);
-     u8g2.print(x1);
+     u8g2.print(ackData[2]);
      u8g2.setCursor(58, 7);
-     u8g2.print(x2);
+     u8g2.print(ackData[3]);
      u8g2.setCursor(116, 7);
-     u8g2.print(x3);
+     u8g2.print(ackData[4]);
      u8g2.drawDisc(63, 60, 2); 
-     if (x1<40){
-       u8g2.drawTriangle(56-(x1*1.3), 63, 56-(x1*1.3), 51, 56-(x1*1.3)+6, 57);
+     if (ackData[2]<40){
+       u8g2.drawTriangle(56-(ackData[2]*1.3), 63, 56-(ackData[2]*1.3), 51, 56-(ackData[2]*1.3)+6, 57);
      }
-     if (x3<40){
-       u8g2.drawTriangle(68+(x3*1.3), 63, 68+(x3*1.3), 51, 68+(x3*1.3)-6, 57);
+     if (ackData[4]<40){
+       u8g2.drawTriangle(68+(ackData[4]*1.3), 63, 68+(ackData[4]*1.3), 51, 68+(ackData[4]*1.3)-6, 57);
 
      }
-     if (x2<40){
-       u8g2.drawTriangle(63, 60-(x2*1.15), 57, 54-(x2*1.15), 69, 54-(x2*1.15)); 
+     if (ackData[3]<40){
+       u8g2.drawTriangle(63, 60-(ackData[3]*1.15), 57, 54-(ackData[3]*1.15), 69, 54-(ackData[3]*1.15)); 
      }
    }
    else if (vScreen==2){
      // this displays a bar graph (most likely motor speed)//*
-     int graphH1= motorA*.48;
-     int graphH2= motorB* .48;
+     int graphH1= ackData[0]*.48;
+     int graphH2= ackData[1]* .48;
      u8g2.drawFrame(0, 12, 12, 52); 
      u8g2.drawBox(2, 62-graphH1, 8, graphH1);
 
@@ -273,15 +273,15 @@ void PrintToLCD() {
      u8g2.drawCircle(55, 60, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
      u8g2.drawDisc(55, 60, 2); 
      
-     int s1x = 17* cos(radians(180-servo1)) +55; 
-     int s2x= 17* cos(radians(180-servo2)) + 55; 
-     int s1y = 17 * -sin(radians(180-servo1))+ 26;
-     int s2y= 17 * -sin(radians(180-servo2)) +60;
+     int s1x = 17* cos(radians(180-ackData[5])) +55; 
+     int s2x= 17* cos(radians(180-ackData[6])) + 55; 
+     int s1y = 17 * -sin(radians(180-ackData[5]))+ 26;
+     int s2y= 17 * -sin(radians(180-ackData[6])) +60;
      ///*
-     int e1x= 5 * cos(radians(360-servo1))+55;
-     int e2x=5 * cos(radians(360-servo2))+55;
-     int e1y=5 * -sin(radians(360-servo1))+26;
-     int e2y=5 * -sin(radians(360-servo2)) +60;
+     int e1x= 5 * cos(radians(360-ackData[5]))+55;
+     int e2x=5 * cos(radians(360-ackData[6]))+55;
+     int e1y=5 * -sin(radians(360-ackData[5]))+26;
+     int e2y=5 * -sin(radians(360-ackData[6])) +60;
      //*/
      u8g2.drawLine(s1x, s1y, e1x, e1y); 
      u8g2.drawLine(s2x, s2y, e2x, e2y); 

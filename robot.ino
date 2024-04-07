@@ -15,7 +15,7 @@ RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN
 
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
 int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data. 
-int ackData[2] = {109, -4000}; // the two values to send back to the remote, just using random numbers for now
+int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers for now
 bool newData = false;
 // L298P Motor Shield Portion, copied from https://protosupplies.com
 //  Motor A
