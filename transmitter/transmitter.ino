@@ -6,10 +6,6 @@ Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter
 Note that the serial monitor should be set to 115200bps to monitor the serial.print() output. 
 
 You need to install the library titled "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
-You need to install the library titled "LCD_I2C" from the library manager. "LCD_I2C" by "Blackhack"
-
-v2.2 adds I2C LCD display for 16ackData[3] LCD using I2C controller board.  Requires "LCD_I2C" library by "Blackhack".
-I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 */
 
 #include <SPI.h>  // (SPI bus uses hardware IO pins 11, 12, 13)
