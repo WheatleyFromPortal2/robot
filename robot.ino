@@ -149,22 +149,19 @@ void loop() {
          digitalWrite(M2dirPin,LOW);
          analogWrite(M1pwmPin, M1speed);
          analogWrite(M2pwmPin, M2speed); */
-         Motor('A', 'R', mSpeed);
-         Motor('B', 'R', mSpeed);
+         Motor('C', 'R', mSpeed); // Both motors go at mSpeed
       }
       else if (payload[0]< -10){
          /*digitalWrite(M1dirPin,HIGH);
          digitalWrite(M2dirPin,HIGH);
          analogWrite(M1pwmPin, M1speed);
          analogWrite(M2pwmPin, M2speed);*/
-         Motor('A', 'F', mSpeed);
-         Motor('B', 'F', mSpeed);
+         Motor('C', 'F', mSpeed); // Both motors go at mSpeed
       }
       else {
          /*analogWrite(M1pwmPin, 0);  //pwm value of 0 is stopped
          analogWrite(M2pwmPin, 0);  //pwm value of 0 is stopped*/
-         Motor('A', 'F', 0); // "0" is to set motor to stop
-         Motor('B', 'F', 0); // "0" is to set motor to stop
+         Motor('C', 'F', 0); // Set both motors to stop
      }
 
 
