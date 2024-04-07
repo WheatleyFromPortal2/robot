@@ -32,17 +32,7 @@ int const INB = 2;
 int const MIN_SPEED = 10;   // Set to minimum PWM value that will make motors turn
 int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up or down.
 // End L298P
-/*
-// motor control io pin assignments
-int M1pwmPin = 5;     //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
-int M1dirPin = 3;     //IOpin assignment, direction for motor1.  IO pin12 is default
 
-int M2pwmPin = 6;     //IOpin assignment, enable for motor2 (pwm on this pin). IO pin11 is default, but changed to leave SPI port available
-int M2dirPin = 2;     //IOpin assignment, direction for motor2. IO pin13 is default
-
-int M1speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor, value of 0-255
-int M2speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor, value of 0-255
-*/
 // Hobby Servo io pin assignments
 int const Svo1pin = A0; // (A0 = pin14)
 int const Svo2pin = 7;
@@ -147,39 +137,21 @@ void loop() {
           mSpeed = payload[1];
         }
         if (payload[1]>10){
-         /*digitalWrite(M1dirPin,HIGH);
-         digitalWrite(M2dirPin,LOW);
-         analogWrite(M1pwmPin, M1speed);
-         analogWrite(M2pwmPin, M2speed); */
          Motor('A', 'F', mSpeed); // Set Motor A to go forward and speed of payload
          Motor('B', 'R', mSpeed); // Set Motor B to go reverse and speed of payload
          
       }
       else if (payload[1]< -10){
-         /*digitalWrite(M1dirPin,LOW);
-         digitalWrite(M2dirPin,HIGH);
-         analogWrite(M1pwmPin, M1speed);
-         analogWrite(M2pwmPin, M2speed); */
          Motor('A', 'F', mSpeed); // Set Motor A to forward and speed of payload
          Motor('B', 'R', mSpeed); // Set Motor B to reverse and speed of payload
       }
       else if (payload[0]> 10){
-         /*digitalWrite(M1dirPin,LOW);
-         digitalWrite(M2dirPin,LOW);
-         analogWrite(M1pwmPin, M1speed);
-         analogWrite(M2pwmPin, M2speed); */
          Motor('C', 'R', mSpeed); // Both motors go at mSpeed
       }
       else if (payload[0]< -10){
-         /*digitalWrite(M1dirPin,HIGH);
-         digitalWrite(M2dirPin,HIGH);
-         analogWrite(M1pwmPin, M1speed);
-         analogWrite(M2pwmPin, M2speed);*/
          Motor('C', 'F', mSpeed); // Both motors go at mSpeed
       }
       else {
-         /*analogWrite(M1pwmPin, 0);  //pwm value of 0 is stopped
-         analogWrite(M2pwmPin, 0);  //pwm value of 0 is stopped*/
          Motor('C', 'F', 0); // Set both motors to stop
      }
 
