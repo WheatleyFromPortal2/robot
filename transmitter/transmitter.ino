@@ -1,17 +1,16 @@
-/* 
-This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
+/*This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
 
 Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter and receiver use the same number so they are paired together.
 
 Note that the serial monitor should be set to 115200bps to monitor the serial.print() output. 
 
-You need to install the library titled "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
-*/
+You need to install the libraries titled:
+- "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
+- "U8g2" from the library manager.  "U8g2" by "oliver"<olikraus@gmail.com> */
 
 #include <SPI.h>  // (SPI bus uses hardware IO pins 11, 12, 13)
 #include <printf.h>
 #include <RF24.h>
-// ---Code for U8g2 Display---
 #include <U8g2lib.h>
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2); // define OLED display
 int ackData[8] = {28, 67, 10, 20, 30, 20, 160, 1}; // just example values, check README.md for more info on what they actually mean
