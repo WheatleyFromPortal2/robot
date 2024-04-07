@@ -14,8 +14,8 @@ const byte thisSlaveAddress[] = {'R', 'x', 'A', 'A', 'A', 'A'};
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
-int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data. 
-int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers for now
+int payload[8];  // array to hold received data.  See README.md to see what it holds
+int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test
 bool newData = false;
 // L298P Motor Shield Portion, copied from https://protosupplies.com
 //  Motor A
@@ -40,8 +40,10 @@ int M1speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor
 int M2speed=255; // variable holding PWM (Pulse Width Modulation) speed of motor, value of 0-255
 */
 // Hobby Servo io pin assignments
-int Svo1pin = A0;
+int Svo1pin = A0; // (A0 = pin14)
+int Svo2pin = A1; // (A1 = pin15)
 Servo Servo1; // create instance of servo
+Servo Servo2; // create instance of servo
 int mSpeed;
 int retry=0;
 
@@ -178,7 +180,10 @@ void loop() {
   Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm" );
   radio.read(&payload,sizeof(payload));
   }
-  // ---Get ackData values from hardware---
+  // ---Get ackData values from hardware, Motor data is in Motor function---
+  
+  ackData[5] = Servo1.read(); // '.read' function is misleading because it only reads the last written position, not the actual position, since that cannot be electrically done
+  ackData[6] = Servo2.read(); // same issue here, but it's better than nothing
 
   if (goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
     ackData[7] = 1;
