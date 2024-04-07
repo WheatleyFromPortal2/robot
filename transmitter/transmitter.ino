@@ -19,8 +19,8 @@ I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 #include <U8g2lib.h>
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 // ---Varaibles needed to be transmitted by the Robot--- (U8g2 display)
-int motor1=28;
-int motor2=67;
+int motorA=28;
+int motorB=67;
 int x1=10; // distance values from distance sensors. x1-x3
 int x2=20;
 int x3=30; 
@@ -253,8 +253,8 @@ void PrintToLCD() {
    }
    else if (vScreen==2){
      // this displays a bar graph (most likely motor speed)//*
-     int graphH1= motor1*.48;
-     int graphH2= motor2* .48;
+     int graphH1= motorA*.48;
+     int graphH2= motorB* .48;
      u8g2.drawFrame(0, 12, 12, 52); 
      u8g2.drawBox(2, 62-graphH1, 8, graphH1);
 
