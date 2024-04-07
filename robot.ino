@@ -72,7 +72,7 @@ void setup() {
   printf_begin();             // needed only once for printing details
   radio.printPrettyDetails(); // (larger) function that prints human readable data
   pinMode(4, OUTPUT);
-  radio.writeAckPayload(1, &ackData, sizeof(ackData)); // pre-load data
+  radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // pre-load data
   payload[0]=0;   // this code puts in default values for the payload
   payload[1]=0;
   for(int x=2; x<8; x++){
@@ -187,7 +187,7 @@ void loop() {
   else {
     ackData[0] = 0;
   }
-   radio.writeAckPayload(1, &ackData, sizeof(ackData)); // load the payload for the next time
+   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
 }
 
 /*
