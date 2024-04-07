@@ -17,7 +17,7 @@ I2C LCD control board uses only 4 pins.  Gnd, +5v, Pin A4 (SDA), Pin A5 (SCL).
 #include <RF24.h>
 // ---Code for U8g2 Display---
 #include <U8g2lib.h>
-U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
+U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2); // define OLED display
 // ---Varaibles needed to be transmitted by the Robot--- (U8g2 display)
 int motorA=28;
 int motorB=67;
@@ -58,7 +58,7 @@ int RF_CSN = 10;
 String buf = String(ChannelFrequency);
 // Variables for recieving data from Robot, using ackData
 
-int ackData[2] = {-1, -1};
+int ackData[8] = {-1, -1, -1, -1, -1, -1, -1, -1}; // -1 is just to test, check README for info on what each is for
 bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
@@ -195,6 +195,7 @@ void send() {
 void PrintToLCD() {
   gfxTime = millis();
   txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
+
   if (vScreen == 0){ // Prints the !!OLD!! screen, add more else-ifs for more screens!
     /*display.clearDisplay();
     display.setCursor(0,0);
