@@ -12,7 +12,8 @@ You need to install the libraries titled:
 #include <printf.h>
 #include <RF24.h>
 #include <U8g2lib.h>
-U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2); // define OLED display
+#include <Wire.h>
+U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2); 
 int ackData[8] = {28, 67, 10, 20, 30, 20, 160, 1}; // just example values, check README.md for more info on what they actually mean
 
 bool LCDinstalled = true; // if LCD installed, make this true
@@ -47,6 +48,7 @@ RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
 
 int payload[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
 long unsigned int TimeNow;
 long unsigned int TimeNext;
 long unsigned int successfulTx;
@@ -149,112 +151,116 @@ void send() {
 }
 
 void PrintToLCD() {
-  gfxTime = millis();
-  txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
+  u8g2.firstPage();
+  do {
+    gfxTime = millis();
+    txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
 
-  if (vScreen == 0){ // Raw Data vScreen
-  u8g2.setFont(u8g2_font_profont10_mf);
-    u8g2.clearDisplay();
-    u8g2.setCursor(0,0);
-    u8g2.print("Payload: {"); // Print payload
-    for (int i = 0; i<=7; i++){
-      u8g2.print(payload[i]);
+    if (vScreen == 0){ // Raw Data vScreen
+    u8g2.setFont(u8g2_font_profont10_mf);
+      //u8g2.clearDisplay();
+      u8g2.setCursor(0,0);
+      u8g2.print("Payload: {"); // Print payload
+      for (int i = 0; i<=7; i++){
+        u8g2.print(payload[i]);
+        u8g2.print(" ");
+      }
+      u8g2.print("}");
+      u8g2.println("ackData: {"); // Print ackData
+      for (int i = 0; i<=7; i++){
+        u8g2.print(ackData[i]);
+        u8g2.print(" ");
+      }
+      u8g2.println("Tx Suc/Fail: ");// Print Tx Success/Fail and percent
+      u8g2.print(successfulTx);
+      u8g2.print("/");
+      u8g2.print(failedTx);
       u8g2.print(" ");
+      u8g2.print(txPercent);
+      u8g2.print("%");
+      if (goodSignal){
+        u8g2.println("Good Signal!");
+      }
+      else {u8g2.println("Bad Signal");}
     }
-    u8g2.print("}");
-    u8g2.println("ackData: {"); // Print ackData
-    for (int i = 0; i<=7; i++){
-      u8g2.print(ackData[i]);
-      u8g2.print(" ");
-    }
-    u8g2.println("Tx Suc/Fail: ");// Print Tx Success/Fail and percent
-    u8g2.print(successfulTx);
-    u8g2.print("/");
-    u8g2.print(failedTx);
-    u8g2.print(" ");
-    u8g2.print(txPercent);
-    u8g2.print("%");
-    if (goodSignal){
-      u8g2.println("Good Signal!");
-    }
-    else {u8g2.println("Bad Signal");}
-  }
-  else if (vScreen == 1){
-  // this displays the proximity data
-    u8g2.clearDisplay();
-    u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
-    u8g2.setFont(u8g2_font_profont11_mf);
-    u8g2.setCursor(0, 7);
-    u8g2.print(ackData[2]);
-    u8g2.setCursor(58, 7);
-    u8g2.print(ackData[3]);
-    u8g2.setCursor(116, 7);
-    u8g2.print(ackData[4]);
-    u8g2.drawDisc(63, 60, 2); 
-    if (ackData[2]<40){
-     u8g2.drawTriangle(56-(ackData[2]*1.3), 63, 56-(ackData[2]*1.3), 51, 56-(ackData[2]*1.3)+6, 57);
-    }
-    if (ackData[4]<40){
-     u8g2.drawTriangle(68+(ackData[4]*1.3), 63, 68+(ackData[4]*1.3), 51, 68+(ackData[4]*1.3)-6, 57);
+    else if (vScreen == 1){
+    // this displays the proximity data
+      //u8g2.clearDisplay();
+      Serial.println("PRINTING VSCREEN 1");
+      u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
+      u8g2.setFont(u8g2_font_profont11_mf);
+      u8g2.setCursor(0, 7);
+      u8g2.print(ackData[2]);
+      u8g2.setCursor(58, 7);
+      u8g2.print(ackData[3]);
+      u8g2.setCursor(116, 7);
+      u8g2.print(ackData[4]);
+      u8g2.drawDisc(63, 60, 2); 
+      if (ackData[2]<40){
+      u8g2.drawTriangle(56-(ackData[2]*1.3), 63, 56-(ackData[2]*1.3), 51, 56-(ackData[2]*1.3)+6, 57);
+      }
+      if (ackData[4]<40){
+      u8g2.drawTriangle(68+(ackData[4]*1.3), 63, 68+(ackData[4]*1.3), 51, 68+(ackData[4]*1.3)-6, 57);
 
+      }
+      if (ackData[3]<40){
+      u8g2.drawTriangle(63, 60-(ackData[3]*1.15), 57, 54-(ackData[3]*1.15), 69, 54-(ackData[3]*1.15)); 
+      }
     }
-    if (ackData[3]<40){
-     u8g2.drawTriangle(63, 60-(ackData[3]*1.15), 57, 54-(ackData[3]*1.15), 69, 54-(ackData[3]*1.15)); 
+    else if (vScreen==2){
+      // this displays a bar graph (most likely motor speed)//*
+      //u8g2.clearDisplay();
+      int graphH1= ackData[0]*.48;
+      int graphH2= ackData[1]* .48;
+      u8g2.drawFrame(0, 12, 12, 52); 
+      u8g2.drawBox(2, 62-graphH1, 8, graphH1);
+
+      u8g2.drawFrame(18, 12, 12, 52); 
+      u8g2.drawBox(20, 62-graphH2, 8, graphH2);
+
+      u8g2.setFont(u8g2_font_profont11_mf);
+      u8g2.setCursor(1, 7);
+      u8g2.print("M1");
+      u8g2.setCursor(19, 7);
+      u8g2.print("M2");
+      // draws a dial for servo position
+      u8g2.drawCircle(55, 26, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
+      u8g2.drawDisc(55, 26, 2); 
+      u8g2.drawCircle(55, 60, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
+      u8g2.drawDisc(55, 60, 2); 
+      
+      int s1x = 17* cos(radians(180-ackData[5])) +55; 
+      int s2x= 17* cos(radians(180-ackData[6])) + 55; 
+      int s1y = 17 * -sin(radians(180-ackData[5]))+ 26;
+      int s2y= 17 * -sin(radians(180-ackData[6])) +60;
+      ///*
+      int e1x= 5 * cos(radians(360-ackData[5]))+55;
+      int e2x=5 * cos(radians(360-ackData[6]))+55;
+      int e1y=5 * -sin(radians(360-ackData[5]))+26;
+      int e2y=5 * -sin(radians(360-ackData[6])) +60;
+      //*/
+      u8g2.drawLine(s1x, s1y, e1x, e1y); 
+      u8g2.drawLine(s2x, s2y, e2x, e2y); 
+
+      u8g2.setCursor(50, 7);
+      u8g2.print("S1");
+      u8g2.setCursor(50, 42);
+      u8g2.print("S2");
+      // print status of communication
+      u8g2.setCursor(80,7);
+      if (lastTxSuccess){
+        u8g2.print("TX: OK");
+      }
+      else u8g2.print("TX: fail");
+      u8g2.setCursor(80,17);
+      if (lastRxSuccess){
+        u8g2.print("RX: OK");
+      }
+      else u8g2.print("RX: fail");
+    
     }
-  }
-   else if (vScreen==2){
-     // this displays a bar graph (most likely motor speed)//*
-     u8g2.clearDisplay();
-     int graphH1= ackData[0]*.48;
-     int graphH2= ackData[1]* .48;
-     u8g2.drawFrame(0, 12, 12, 52); 
-     u8g2.drawBox(2, 62-graphH1, 8, graphH1);
-
-     u8g2.drawFrame(18, 12, 12, 52); 
-     u8g2.drawBox(20, 62-graphH2, 8, graphH2);
-
-     u8g2.setFont(u8g2_font_profont11_mf);
-     u8g2.setCursor(1, 7);
-     u8g2.print("M1");
-     u8g2.setCursor(19, 7);
-     u8g2.print("M2");
-     // draws a dial for servo position
-     u8g2.drawCircle(55, 26, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
-     u8g2.drawDisc(55, 26, 2); 
-     u8g2.drawCircle(55, 60, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
-     u8g2.drawDisc(55, 60, 2); 
-     
-     int s1x = 17* cos(radians(180-ackData[5])) +55; 
-     int s2x= 17* cos(radians(180-ackData[6])) + 55; 
-     int s1y = 17 * -sin(radians(180-ackData[5]))+ 26;
-     int s2y= 17 * -sin(radians(180-ackData[6])) +60;
-     ///*
-     int e1x= 5 * cos(radians(360-ackData[5]))+55;
-     int e2x=5 * cos(radians(360-ackData[6]))+55;
-     int e1y=5 * -sin(radians(360-ackData[5]))+26;
-     int e2y=5 * -sin(radians(360-ackData[6])) +60;
-     //*/
-     u8g2.drawLine(s1x, s1y, e1x, e1y); 
-     u8g2.drawLine(s2x, s2y, e2x, e2y); 
-
-     u8g2.setCursor(50, 7);
-     u8g2.print("S1");
-     u8g2.setCursor(50, 42);
-     u8g2.print("S2");
-     // print status of communication
-     u8g2.setCursor(80,7);
-     if (lastTxSuccess){
-       u8g2.print("TX: OK");
-     }
-     else u8g2.print("TX: fail");
-     u8g2.setCursor(80,17);
-     if (lastRxSuccess){
-       u8g2.print("RX: OK");
-     }
-     else u8g2.print("RX: fail");
-   
-  }
-  gfxTime = millis() - gfxTime;
-  Serial.println("gfxTime: ");
-  Serial.print(gfxTime);
+    gfxTime = millis() - gfxTime;
+    Serial.println("gfxTime: ");
+    Serial.print(gfxTime);
+  } while ( u8g2.nextPage() );
 }
