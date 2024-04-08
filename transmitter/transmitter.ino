@@ -55,7 +55,7 @@ bool lastTxSuccess;
 bool lastRxSuccess;
 int txPercent;
 int displayMode=1;
-int vScreen;
+int vScreen = 1;
 bool goodSignal;
 void setup() {
 
