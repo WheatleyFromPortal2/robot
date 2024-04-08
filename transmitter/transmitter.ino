@@ -95,7 +95,7 @@ void loop() {
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
-  payload[6] = digitalRead(ButtonE);
+  payload[6] = digitalRead(ButtonE); // should be removed, as ButtonE is used for controlling the vScreen
   payload[7] = digitalRead(ButtonF);
   if (currentMillis - prevMillis >= txIntervalMillis) {
     send();
@@ -115,7 +115,7 @@ void loop() {
 
   radio.read(&payload,sizeof(payload));
   }
-  if(digitalRead(6)==0){
+  if(digitalRead(ButtonE)==0){
     displayMode++;
     displayMode = displayMode%2;
   }
