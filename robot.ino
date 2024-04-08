@@ -3,11 +3,11 @@
 #include <RF24.h>
 #include <Servo.h>
 //---NR24 Vars---
+byte ChannelFrequency = 24; //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
+byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 int const RF_CE=9;
 int const RF_CSN = 10;
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
-byte ChannelFrequency = 24; //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
-byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
 int payload[8];  // array to hold received data.  See README.md to see what it holds
 int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test
