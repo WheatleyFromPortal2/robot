@@ -35,7 +35,7 @@ int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up o
 
 // Hobby Servo io pin assignments
 int const Svo1pin = A0; // (A0 = pin14)
-int const Svo2pin = 7;
+int const Svo2pin = A1;
 Servo Servo1; // create instance of servo
 Servo Servo2; // create instance of servo
 int mSpeed;
@@ -131,10 +131,11 @@ void loop() {
       delay(50);
     }
         if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
-          mSpeed = payload[1] / 2.0; // If the button isn't pressed, make is slower
+          mSpeed = payload[1]; // If the button isn't pressed, make is slower
         }
         else {
-          mSpeed = payload[1];
+          mSpeed = payload[1] / 2.0;
+          Serial.println("ENGAGING AFTERBURNERS");
         }
         if (payload[1]>10){
          Motor('A', 'F', mSpeed); // Set Motor A to go forward and speed of payload
