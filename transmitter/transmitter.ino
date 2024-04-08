@@ -41,7 +41,7 @@ String buf = String(ChannelFrequency);
 bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
-unsigned long txIntervalMillis = 1000; // send once per second
+unsigned long txIntervalMillis = 20; // send once per second
 unsigned long gfxTime;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
