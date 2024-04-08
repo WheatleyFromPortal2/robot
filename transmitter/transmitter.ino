@@ -65,14 +65,14 @@ void setup() {
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
   }
-  Serial.print("ChannelFrequency=");
+  Serial.print(F("ChannelFrequency=")); // "F" is to force reading from flash, to reduce dynamic memory use
   Serial.println(ChannelFrequency);
-  Serial.print("RFpipe=");
+  Serial.print(F("RFpipe="));
   Serial.println(RFpipe);
   u8g2.begin(); // Enables U8g2 display
-  u8g2.print("Freq:");
+  u8g2.print(F("Freq:"));
   u8g2.print(ChannelFrequency);
-  u8g2.println("RFpipe: ");
+  u8g2.println(F("RFpipe: "));
   u8g2.print(RFpipe);
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding.  Please reset."));
