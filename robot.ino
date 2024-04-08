@@ -2,27 +2,24 @@
 #include <printf.h>
 #include <RF24.h>
 #include <Servo.h>
-
-// RF24 settings and IO pin assignments
-byte ChannelFrequency = 24; //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
-byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
-
+//---NR24 Vars---
 int const RF_CE=9;
 int const RF_CSN = 10;
-int const trigger = 8; // specify pin used to trigger distance sensors, connect this to all of them
-const byte thisSlaveAddress[] = {'R', 'x', 'A', 'A', 'A', 'A'};
-int const x1Pin = A0; // Pin for leftmost distance sensor echo
-int const x2Pin = A1; // Pin for middle distance sensor echo
-int const x3Pin = A2; // Pin for rightmost distance sensor echo
-long pulseDuration;
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
-
+byte ChannelFrequency = 24; //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
+byte RFpipe=0;            //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
 int payload[8];  // array to hold received data.  See README.md to see what it holds
 int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test
 bool newData = false;
-// L298P Motor Shield Portion, copied from https://protosupplies.com
-//  Motor A
+//---Distance Sensor Vars---
+int const trigger = 8; // specify pin used to trigger distance sensors, connect this to all of them
+int const x1Pin = A0; // Pin for leftmost distance sensor echo
+int const x2Pin = A1; // Pin for middle distance sensor echo
+int const x3Pin = A2; // Pin for rightmost distance sensor echo
+long pulseDuration;
+//---L298P Motor Shield---
+//  Motor A4
 int const BUZZER = 4;
 int const ENA = 5;  
 int const INA = 3;
@@ -31,15 +28,13 @@ int const ENB = 6;
 int const INB = 2;
 int const MIN_SPEED = 10;   // Set to minimum PWM value that will make motors turn
 int const ACCEL_DELAY = 50; // delay between steps when ramping motor speed up or down.
-// End L298P
-
-// Hobby Servo io pin assignments
+int mSpeed;
+int retry=0;
+//---Servo Vars---
 int const Svo1pin = A0; // (A0 = pin14)
 int const Svo2pin = A1;
 Servo Servo1; // create instance of servo
 Servo Servo2; // create instance of servo
-int mSpeed;
-int retry=0;
 
 void setup() {
   // L298P Motor Shield Portion
@@ -47,14 +42,15 @@ void setup() {
   pinMode(ENB, OUTPUT);
   pinMode(INA, OUTPUT);
   pinMode(INB, OUTPUT);
-  pinMode(BUZZER, OUTPUT);
+  pinMode(BUZZER, OUTPUT); // set buzzer pin to output
   // End 298P Portion
-  pinMode(trigger, OUTPUT);
-  pinMode(x1Pin, INPUT);
-  pinMode(x2Pin, INPUT);
-  pinMode(x3Pin, INPUT);
-  Servo1.attach(Svo1pin);
-  Serial.begin(115200);
+  pinMode(trigger, OUTPUT); // Set trigger pin for distance sensors to OUTPUT
+  pinMode(x1Pin, INPUT); // Set echo pin for leftmost to INPUT
+  pinMode(x2Pin, INPUT); // Set echo pin for middle to INPUT
+  pinMode(x3Pin, INPUT); // Set echo pin for rightmost to INPUT
+  Servo1.attach(Svo1pin); // Attach Servo1
+  Servo2.attach(Svo2pin); // Attach Servo2
+  Serial.begin(115200); // Begin Serial at 115200 Baud, make sure the it is set to 115200 in Ardiuno IDE
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
   }
@@ -132,6 +128,7 @@ void loop() {
     }
         if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
           mSpeed = payload[1]; // If the button isn't pressed, make is slower
+          Serial.println("Normal Speed");
         }
         else {
           mSpeed = payload[1] / 2.0;
@@ -254,7 +251,6 @@ void Motor(char mot, char dir, int speed)
       break;
   }
   // Send what we are doing with the motors out to the Serial Monitor.
-  
   Serial.print ("[Motor Func] Motor: ");
   if (mot=='C')
       Serial.print ("Both");
