@@ -50,7 +50,7 @@ void setup() {
   pinMode(x3Pin, INPUT); // Set echo pin for rightmost to INPUT
   Servo1.attach(Svo1pin); // Attach Servo1
   Servo2.attach(Svo2pin); // Attach Servo2
-  Serial.begin(115200); // Begin Serial at 115200 Baud, make sure the it is set to 115200 in Ardiuno IDE
+  Serial.begin(115200); // Begin Serial at 115200 Baud, !!!make sure the it is set to 115200 in Ardiuno IDE!!!
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
   }
@@ -58,6 +58,7 @@ void setup() {
     Serial.println(F("radio hardware is not responding!!"));
     while (1) {} // hold in infinite loop
   }
+  radio.setDataRate(RF24_250KBPS);
   radio.setChannel(ChannelFrequency);  // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);  // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));  
@@ -256,10 +257,10 @@ void Motor(char mot, char dir, int speed)
       Serial.print ("Both");
     else
       Serial.print (mot);
-  Serial.print ("t Direction: ");
+  Serial.print (" Direction: ");
   Serial.print (dir);
-  Serial.print ("t Speed: ");
+  Serial.print (" Speed: ");
   Serial.print (speed);
-  Serial.print ("t Mapped Speed: ");
+  Serial.print (" Mapped Speed: ");
   Serial.println (newspeed);
 }

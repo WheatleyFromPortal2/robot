@@ -57,7 +57,7 @@ bool lastTxSuccess;
 bool lastRxSuccess;
 int txPercent;
 int displayMode=1;
-int vScreen = 1;
+int vScreen = 0;
 bool goodSignal;
 void setup() {
 
@@ -78,12 +78,13 @@ void setup() {
     Serial.println(F("radio hardware is not responding.  Please reset."));
     for(;;);  // hold in infinite loop
   }
+  radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();
   radio.setChannel(ChannelFrequency);      // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));   // float datatype occupies 4 bytes
   radio.openWritingPipe(address[RFpipe]);  // set the transmit pipe to use
-  radio.stopListening();                   // put radio in TX mode
+  //radio.stopListening();                  // put radio in TX mode, maybe this will fix ackData?
 }  // setup
 
 void loop() {
@@ -160,15 +161,15 @@ void PrintToLCD() {
     if (vScreen == 0){ // Raw Data vScreen
       u8g2.setFont(u8g2_font_profont11_mf);
       //u8g2.clearDisplay();
-      u8g2.setCursor(0,0);
-      u8g2.print("Pyld:{"); // Print payload
+      u8g2.setCursor(0,8);
+      u8g2.print("P{"); // Print payload
       for (int i = 0; i<=7; i++){
         u8g2.print(payload[i]);
         u8g2.print(",");
       }
       u8g2.print("}");
       u8g2.setCursor(0, 18);
-      u8g2.print("ackD{"); // Print ackData
+      u8g2.print("aD{"); // Print ackData
       for (int i = 0; i<=7; i++){
         u8g2.print(ackData[i]);
         u8g2.print(",");
@@ -264,7 +265,7 @@ void PrintToLCD() {
     
     }
     gfxTime = millis() - gfxTime;
-    Serial.println("gfxTime: ");
-    Serial.print(gfxTime);
+    //Serial.println("gfxTime: ");
+    //Serial.print(gfxTime);
   } while ( u8g2.nextPage() );
 }
