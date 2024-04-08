@@ -86,8 +86,8 @@ void distances(){ // Calculate distances from distance sensors and put into ackD
   digitalWrite(trigger, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigger, LOW);
-  pulseDuration = pulseIn(x3Pin, HIGH);
-  ackData[4] = pulseDuration * 0.0171;
+  pulseDuration = pulseIn(x3Pin, HIGH); // find time of pulse for x3
+  ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
 }
 
 void loop() {
@@ -111,9 +111,9 @@ void loop() {
     else{                                      // if communication is lost then set all values to default
       retry++;
       if (retry>10){
-        payload[0]=0;
-        payload[1]=0;
-        for(int x=2; x<8; x++){
+        payload[0]=0; // set motor values to zero, so it doesn't start moving on its own 
+        payload[1]=0; 
+        for(int x=2; x<8; x++){ // set all other values to 1, so the buttons aren't recognized as pressed
           payload[x]=1;
         }
         for (int x=0; x<3; x++){               //beep 3 times quickly so user knows communication was lost
@@ -127,11 +127,11 @@ void loop() {
       delay(50);
     }
         if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
-          mSpeed = payload[1]; // If the button isn't pressed, make is slower
+          mSpeed = payload[1] / 2.0; // If the button isn't pressed, make is slower
           Serial.println("Normal Speed");
         }
         else {
-          mSpeed = payload[1] / 2.0;
+          mSpeed = payload[1];
           Serial.println("ENGAGING AFTERBURNERS");
         }
         if (payload[1]>10){
