@@ -157,31 +157,34 @@ void PrintToLCD() {
     txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0; // Calculate the successful Tx percentage, force floating point math
 
     if (vScreen == 0){ // Raw Data vScreen
-    u8g2.setFont(u8g2_font_profont10_mf);
+      u8g2.setFont(u8g2_font_profont11_mf);
       //u8g2.clearDisplay();
       u8g2.setCursor(0,0);
-      u8g2.print("Payload: {"); // Print payload
+      u8g2.print("Pyld:{"); // Print payload
       for (int i = 0; i<=7; i++){
         u8g2.print(payload[i]);
-        u8g2.print(" ");
+        u8g2.print(",");
       }
       u8g2.print("}");
-      u8g2.println("ackData: {"); // Print ackData
+      u8g2.setCursor(0, 18);
+      u8g2.print("ackD{"); // Print ackData
       for (int i = 0; i<=7; i++){
         u8g2.print(ackData[i]);
-        u8g2.print(" ");
+        u8g2.print(",");
       }
-      u8g2.println("Tx Suc/Fail: ");// Print Tx Success/Fail and percent
+      u8g2.setCursor(0, 28);
+      u8g2.print("Tx S/F:");// Print Tx Success/Fail and percent
       u8g2.print(successfulTx);
       u8g2.print("/");
       u8g2.print(failedTx);
       u8g2.print(" ");
       u8g2.print(txPercent);
       u8g2.print("%");
+      u8g2.setCursor(0, 38);
       if (goodSignal){
-        u8g2.println("Good Signal!");
+        u8g2.print("Good Signal!");
       }
-      else {u8g2.println("Bad Signal");}
+      else {u8g2.print("Bad Signal");}
     }
     else if (vScreen == 1){
     // this displays the proximity data
@@ -249,14 +252,14 @@ void PrintToLCD() {
       // print status of communication
       u8g2.setCursor(80,7);
       if (lastTxSuccess){
-        u8g2.print("TX: OK");
+        u8g2.print("Tx: OK");
       }
-      else u8g2.print("TX: fail");
+      else u8g2.print("Tx: fail");
       u8g2.setCursor(80,17);
       if (lastRxSuccess){
-        u8g2.print("RX: OK");
+        u8g2.print("Rx: OK");
       }
-      else u8g2.print("RX: fail");
+      else u8g2.print("Rx: fail");
     
     }
     gfxTime = millis() - gfxTime;
