@@ -181,6 +181,7 @@ void loop() {
   else {
     ackData[7] = 0;
   }
+   Serial.println("Writing ackData");
    radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
    distances(); // get fresh distance values, this may take a second, so we do it after sending the ackData
 }

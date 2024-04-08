@@ -78,6 +78,7 @@ void setup() {
     Serial.println(F("radio hardware is not responding.  Please reset."));
     for(;;);  // hold in infinite loop
   }
+  radio.enableAckPayload();
   radio.setChannel(ChannelFrequency);      // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));   // float datatype occupies 4 bytes
@@ -132,7 +133,7 @@ void send() {
     Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
     successfulTx ++; // Add one to value of successfulTx, since the transmission succeeded
     lastTxSuccess = true;
-    if ( radio.isAckPayloadAvailable() ) {
+    if (radio.isAckPayloadAvailable() ) {
       Serial.println("ackData is available!");
       radio.read(&ackData, sizeof(ackData));
       newData = true;
