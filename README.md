@@ -2,7 +2,7 @@
 # [Robot Code](robot.ino)
 # [Transmitter Code](transmitter/transmitter.ino)
 # Members
-- Will Benkhe
+- Will Behnke
 - William Braskamp
 - Hamzah Salman
 - Hunter Dorrill
