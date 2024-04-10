@@ -46,7 +46,7 @@ unsigned long gfxTime;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
-
+const byte slaveAddress[5] = {'R','x','A','A','A'};
 int payload[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 long unsigned int TimeNow;
@@ -57,7 +57,7 @@ bool lastTxSuccess;
 bool lastRxSuccess;
 int txPercent;
 int displayMode=1;
-int vScreen = 0;
+int vScreen = 2;
 bool goodSignal;
 void setup() {
 
@@ -83,7 +83,7 @@ void setup() {
   radio.setChannel(ChannelFrequency);      // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));   // float datatype occupies 4 bytes
-  radio.openWritingPipe(address[RFpipe]);  // set the transmit pipe to use
+  radio.openWritingPipe(slaveAddress);  // set the transmit pipe to use
   //radio.stopListening();                  // put radio in TX mode, maybe this will fix ackData?
 }  // setup
 
@@ -191,7 +191,7 @@ void PrintToLCD() {
     else if (vScreen == 1){
     // this displays the proximity data
       //u8g2.clearDisplay();
-      Serial.println("PRINTING VSCREEN 1");
+      //Serial.println("PRINTING VSCREEN 1");
       u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT); 
       u8g2.setFont(u8g2_font_profont11_mf);
       u8g2.setCursor(0, 7);

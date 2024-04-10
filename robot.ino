@@ -9,6 +9,7 @@ int const RF_CE=9;
 int const RF_CSN = 10;
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
+const byte thisSlaveAddress[5] = {'R','x','A','A','A'};
 int payload[8];  // array to hold received data.  See README.md to see what it holds
 int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test
 bool newData = false;
@@ -62,7 +63,7 @@ void setup() {
   radio.setChannel(ChannelFrequency);  // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);  // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));  
-  radio.openReadingPipe(1, address[RFpipe]);
+  radio.openReadingPipe(1, thisSlaveAddress);
   radio.enableAckPayload(); // Enables sending data back to transmitter
   radio.startListening(); // put radio in RX mode
   printf_begin();             // needed only once for printing details
