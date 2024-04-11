@@ -10,9 +10,8 @@ int const RF_CE=9;
 int const RF_CSN = 10;
 RF24 radio(RF_CE, RF_CSN ); // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 uint8_t address[][16] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node"};
-const byte thisSlaveAddress[5] = {'R','x','A','A','A'};
 int payload[8];  // array to hold received data.  See README.md to see what it holds
-int ackData[8] = {109, -4000, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test
+int ackData[8] = {404, 404, -1, -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
 bool newData = false;
 //---Distance Sensor Vars---
 int const trigger = 8; // specify pin used to trigger distance sensors, connect this to all of them
@@ -64,7 +63,7 @@ void setup() {
   radio.setChannel(ChannelFrequency);  // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);  // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));  
-  radio.openReadingPipe(1, thisSlaveAddress);
+  radio.openReadingPipe(RFpipe, address[RFpipe]);
   radio.enableAckPayload(); // Enables sending data back to transmitter
   radio.startListening(); // put radio in RX mode
   printf_begin();             // needed only once for printing details
@@ -121,9 +120,9 @@ void loop() {
         }
         for (int x=0; x<3; x++){               //beep 3 times quickly so user knows communication was lost
           digitalWrite(4, HIGH);
-          delay(100);
+          delay(50);
           digitalWrite(4, LOW);
-          delay(100);
+          delay(50);
         }
         resetFunc();                           //reset the arduino so maybe it will regain communication
       }
@@ -137,11 +136,15 @@ void loop() {
           mSpeed = payload[1];
           Serial.println("ENGAGING AFTERBURNERS");
         }
-        if (payload[1]>10){
-         Motor('A', 'F', mSpeed); // Set Motor A to go forward and speed of payload
-         Motor('B', 'R', mSpeed); // Set Motor B to go reverse and speed of payload
-         
-      }
+        if (payload[1]>10 && payload[0] == 0){ // going straight forward
+          Motor('A', 'F', mSpeed); // Set Motor A to go forward and speed of payload
+          Motor('B', 'F', mSpeed); // Set Motor B to go reverse and speed of payload
+        }
+        if (payload[1]<10 && payload[0] == 0){ // going straight backwards
+          Motor('A', 'R', mSpeed);
+          Motor('B', 'R', mSpeed);
+        }
+      
       else if (payload[1]< -10){
          Motor('A', 'F', mSpeed); // Set Motor A to forward and speed of payload
          Motor('B', 'R', mSpeed); // Set Motor B to reverse and speed of payload
@@ -160,7 +163,7 @@ void loop() {
     // These last lines show how to make hobby servo go to a position when button press is received
     
     if (payload[2]==0) Servo1.write(10);  //send test hobby servo to position 10 when button A is pressed
-    else Servo1.write(180);               //send test hobby servo to position 180 When button A is not pressed
+    else {Servo1.write(160);}               //send test hobby servo to position 180 When button A is not pressed
 
     if (payload[3]==0) digitalWrite(4, HIGH);  //turn on buzzer
     else digitalWrite(4, LOW); // turn off buzzer
@@ -183,7 +186,7 @@ void loop() {
   }
    Serial.println("Writing ackData");
    radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
-   distances(); // get fresh distance values, this may take a second, so we do it after sending the ackData
+   //distances(); // get fresh distance values, this may take a second, so we do it after sending the ackData
 }
 
 /*
