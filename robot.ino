@@ -38,6 +38,8 @@ Servo Servo1; // create instance of servo
 Servo Servo2; // create instance of servo
 int x;
 int y;
+bool Svo1On = false;
+bool Svo2On = false;
 
 void setup() {
   // L298P Motor Shield Portion
@@ -141,25 +143,38 @@ void loop() {
     //---Turn X/Y Values into Motor Values---
     x = ackData[0];
     y = ackData[1];
-    if(x>=0){ //
+    if(x>=0){ // if X is positive, make the A motor go forward
       Motor('A', 'F', x);
     }
-    else{
+    else{ // if X is negative, make the A motor go backward
       x = x * -1; // Make X positive
       Motor('A', 'R', x);
     }
-    if(y>=0){
+    if(y>=0){ // if Y is positive, make the B motor go forward
       Motor('B', 'F', y);
     }
-    else{
+    else{ // if the Y is negative, make the B motor go backward
       y = y * -1; // Make Y positive
       Motor('B', 'R', y);
     }
     // These last lines show how to make hobby servo go to a position when button press is received
+    if (payload[2]==0 && !Svo1On){ // buttonA pressed, and Servo1 is not extended
+      Servo1.write(180); // extend Servo1
+      Svo1On = true; // Servo1 is now extended
+    }
+    if (payload[2]==1 && Svo1On){ // buttonA not pressed, and Servo1 extended
+      Servo1.write(10); // unextend Servo1
+      Svo1On = false; // Servo1 is no longer extended
+    }
+    if (payload[3]==0 && !Svo2On){ // buttonB pressed, and Servo2 is not extended
+      Servo2.write(180); // extend Servo2
+      Svo2On = true; // Servo2 is now extended
+    }
+    if (payload[3]==1 && Svo2On){ // buttonB not pressed, and Servo2 extended
+      Servo2.write(10); // unextend Servo2
+      Svo2On = false; // Servo2 is no longer extended
+    }
     
-    if (payload[2]==0) Servo1.write(10);  //send test hobby servo to position 10 when button A is pressed
-    else {Servo1.write(160);}               //send test hobby servo to position 180 When button A is not pressed
-
     if (payload[3]==0) digitalWrite(4, HIGH);  //turn on buzzer
     else digitalWrite(4, LOW); // turn off buzzer
   // Find signal strength, maybe later assign to LED?
