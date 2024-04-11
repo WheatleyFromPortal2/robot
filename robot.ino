@@ -157,7 +157,7 @@ void loop() {
       y = y * -1; // Make Y positive
       Motor('B', 'R', y);
     }
-    // These last lines show how to make hobby servo go to a position when button press is received
+    //---Servo Control---
     if (payload[2]==0 && !Svo1On){ // buttonA pressed, and Servo1 is not extended
       Servo1.write(180); // extend Servo1
       Svo1On = true; // Servo1 is now extended
@@ -174,7 +174,7 @@ void loop() {
       Servo2.write(10); // unextend Servo2
       Svo2On = false; // Servo2 is no longer extended
     }
-    
+
     if (payload[3]==0) digitalWrite(4, HIGH);  //turn on buzzer
     else digitalWrite(4, LOW); // turn off buzzer
   // Find signal strength, maybe later assign to LED?

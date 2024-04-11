@@ -57,6 +57,7 @@ bool lastRxSuccess;
 int txPercent;
 int displayMode = 1;
 int vScreen = 0;
+int signal;
 bool goodSignal;
 void setup() {
 
@@ -161,6 +162,18 @@ void loop() {
   }
 
   void PrintToLCD() {
+    if (goodSignal){
+      if (ackData[7] == 1){
+        signal = 100;
+      }
+      else signal = 75;
+    }
+    else {
+      if (ackData[7] == 1){
+        signal = 50;
+      }
+      else signal = 25;
+    }
     u8g2.firstPage();
     do {
       gfxTime = millis();
@@ -170,14 +183,14 @@ void loop() {
         u8g2.setFont(u8g2_font_profont11_mf);
         //u8g2.clearDisplay();
         u8g2.setCursor(0, 8);
-        u8g2.print("P{");  // Print payload
+        u8g2.print("p");  // Print payload
         for (int i = 0; i <= 7; i++) {
           u8g2.print(payload[i]);
           u8g2.print(",");
         }
         u8g2.print("}");
         u8g2.setCursor(0, 18);
-        u8g2.print("aD{");  // Print ackData
+        u8g2.print("a");  // Print ackData
         for (int i = 0; i <= 7; i++) {
           u8g2.print(ackData[i]);
           u8g2.print(",");
@@ -191,11 +204,9 @@ void loop() {
         u8g2.print(txPercent);
         u8g2.print("%");
         u8g2.setCursor(0, 38);
-        if (goodSignal) {
-          u8g2.print("Good Signal!");
-        } else {
-          u8g2.print("Bad Signal");
-        }
+        u8g2.print("Sig:");
+        u8g2.print(signal);
+        u8g2.print("%");
       } else if (vScreen == 1) {
         // this displays the proximity data
         //u8g2.clearDisplay();
