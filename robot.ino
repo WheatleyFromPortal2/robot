@@ -36,6 +36,8 @@ int const Svo1pin = A0; // (A0 = pin14)
 int const Svo2pin = A1;
 Servo Servo1; // create instance of servo
 Servo Servo2; // create instance of servo
+int x;
+int y;
 
 void setup() {
   // L298P Motor Shield Portion
@@ -128,38 +130,31 @@ void loop() {
       }
       delay(50);
     }
-        if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
-          mSpeed = payload[1] / 2.0; // If the button isn't pressed, make is slower
-          Serial.println("Normal Speed");
-        }
-        else {
-          mSpeed = payload[1];
-          Serial.println("ENGAGING AFTERBURNERS");
-        }
-        if (payload[1]>10 && payload[0] == 0){ // going straight forward
-          Motor('A', 'F', mSpeed); // Set Motor A to go forward and speed of payload
-          Motor('B', 'F', mSpeed); // Set Motor B to go reverse and speed of payload
-        }
-        if (payload[1]<10 && payload[0] == 0){ // going straight backwards
-          Motor('A', 'R', mSpeed);
-          Motor('B', 'R', mSpeed);
-        }
-      
-      else if (payload[1]< -10){
-         Motor('A', 'F', mSpeed); // Set Motor A to forward and speed of payload
-         Motor('B', 'R', mSpeed); // Set Motor B to reverse and speed of payload
-      }
-      else if (payload[0]> 10){
-         Motor('C', 'R', mSpeed); // Both motors go at mSpeed
-      }
-      else if (payload[0]< -10){
-         Motor('C', 'F', mSpeed); // Both motors go at mSpeed
-      }
-      else {
-         Motor('C', 'F', 0); // Set both motors to stop
-     }
-
-
+    if (payload[4]){ // If "Button C" is pressed, ENGAGE AFTERBURNERS
+      mSpeed = payload[1] / 2.0; // If the button isn't pressed, make is slower
+      Serial.println("Normal Speed");
+    }
+    else {
+      mSpeed = payload[1];
+      Serial.println("ENGAGING AFTERBURNERS");
+    }
+    //---Turn X/Y Values into Motor Values---
+    x = ackData[0];
+    y = ackData[1];
+    if(x>=0){ //
+      Motor('A', 'F', x);
+    }
+    else{
+      x = x * -1; // Make X positive
+      Motor('A', 'R', x);
+    }
+    if(y>=0){
+      Motor('B', 'F', y);
+    }
+    else{
+      y = y * -1; // Make Y positive
+      Motor('B', 'R', y);
+    }
     // These last lines show how to make hobby servo go to a position when button press is received
     
     if (payload[2]==0) Servo1.write(10);  //send test hobby servo to position 10 when button A is pressed
