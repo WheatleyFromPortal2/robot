@@ -30,7 +30,7 @@
 - 2 DC Motors
 - nRF24L01
 ## Pin Assignments
-- Buzzer = `4`
+- BUZZER = `4`
 - Servo1 = `7`
 - Servo2 = `8`
 ### Distance Sensors
