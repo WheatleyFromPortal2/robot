@@ -112,10 +112,9 @@ void loop() {
       newData = false;
     }
     // find signal strength
-    goodSignal = radio.testRPD();
+    goodSignal = radio.testCarrier();
     if (radio.available()) {
       Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm");
-
       radio.read(&payload, sizeof(payload));
     }
     if (digitalRead(ButtonE) == 0) {
@@ -177,7 +176,7 @@ void loop() {
     u8g2.firstPage();
     do {
       gfxTime = millis();
-      txPercent = (successfulTx / (successfulTx + failedTx)) * 100.0;  // Calculate the successful Tx percentage, force floating point math
+      txPercent = ((successfulTx / (successfulTx + failedTx))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
 
       if (vScreen == 0) {  // Raw Data vScreen
         u8g2.setFont(u8g2_font_profont11_mf);
@@ -271,11 +270,18 @@ void loop() {
         // print status of communication
         u8g2.setCursor(80, 7);
         if (lastTxSuccess) {
-          u8g2.print("Tx: OK");
-        } else u8g2.print("Tx: fail");
+          if (goodSignal){
+            u8g2.print("Tx: OK");
+          }
+          else u8g2.print("Tx: low");
+        } 
+        else u8g2.print("Tx: fail");
         u8g2.setCursor(80, 17);
         if (lastRxSuccess) {
-          u8g2.print("Rx: OK");
+          if (ackData[7] == 1){
+            u8g2.print("Rx: OK");
+          }
+          u8g2.print("Rx: low");
         } else u8g2.print("Rx: fail");
       }
       gfxTime = millis() - gfxTime;

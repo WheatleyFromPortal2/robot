@@ -195,11 +195,11 @@ void controlRobot() {
       else digitalWrite(BUZZER, LOW); // turn off buzzer
 }
 void sendAckData(){
-  ackData[0] = M1speed*M1dir; 
-  ackData[1]= M2speed*M2dir; 
+  ackData[0] = M1speed; 
+  ackData[1]= M2speed; 
   ackData[5]= Servo1.read(); 
   ackData[6]= Servo2.read(); 
-  bool goodSignal = radio.testRPD();
+  bool goodSignal = radio.testCarrier();
   if (goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
     ackData[7] = 1;
     Serial.println("Strong signal > -64dBm");
