@@ -16,8 +16,6 @@ You need to install the libraries titled:
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 int ackData[8] = { 28, 67, 10, 20, 30, 20, 160, 1 };  // just example values, check README.md for more info on what they actually mean
 
-bool LCDinstalled = true;  // if LCD installed, make this true
-
 // io pin assignments for joystick shield
 int AnalogX = A0;
 int AnalogY = A1;
@@ -116,12 +114,11 @@ void loop() {
       Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm");
       radio.read(&payload, sizeof(payload));
     }
-    if (LCDinstalled) PrintToLCD();
+    PrintToLCD();
     Serial.println("GFXtime: ");
     Serial.println(gfxTime);
     if (gfxTime > 50) {
       Serial.println("[ERROR] GFXtime too long!");
-      //LCDinstalled = false;
       vScreen = -1; // set error vScreen
     } else {
       delay(50 - gfxTime);  // slow transmissions down by 50ms, accounting for time it takes to render to the display
@@ -174,10 +171,15 @@ void loop() {
     do {
       gfxTime = millis();
       txPercent = ((successfulTx / (successfulTx + failedTx))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
-      if (vScreen == -1) {
+      if (vScreen == -1) { // Print "gfxTime too long" error message
         u8g2.setFont(u8g2_font_profont11_mf);
         u8g2.setCursor(0,8);
-        u8g2.print("Disconnected");
+        u8g2.print("gfxTime was too long!");
+        u8g2.setCursor(0,18);
+        u8g2.print("gfxTime: ");
+        u8g2.print(gfxTime);
+        u8g2.setCursor(0,28);
+        u8g2.print("Press ButtonE to reset");
       }
       if (vScreen == 0) {  // Raw Data vScreen
         u8g2.setFont(u8g2_font_profont11_mf);
