@@ -130,17 +130,17 @@ void getData() {
   }
 }
 void controlRobot() {
-  if !(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone){
+  if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)){
     if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
-      if (payload[0]>50){
-        M1speed = (payload[0]-50)*7/5+30; 
-        M2speed = (payload[0]-50)*7/5+30; 
+      if (payload[0]<50){
+        M1speed = (payload[0]-90)*7/5+30; 
+        M2speed = (payload[0]-75)*7/5+30; 
         M1dir= 1; 
         M2dir= 0;
       }
       else{
-        M1speed = (payload[0]*-1-50)*7/5+30; 
-        M2speed = (payload[0]*-1-50)*7/5+30; 
+        M1speed = (payload[0]*-1-90)*7/5+30; 
+        M2speed = (payload[0]*-1-90)*7/5+30; 
         M1dir= 0; 
         M2dir= 1;
       }
@@ -159,13 +159,13 @@ void controlRobot() {
         M2dir= 0; 
     }
     if (payload[4]){
-      M1speed=100; 
+      M1speed= 100; 
       M2speed= 100;
     }
     digitalWrite(M1dirPin, M1dir);
     digitalWrite(M2dirPin, M2dir);
-    analogWrite(M1pwmPin, M1speed*2.5);
-    analogWrite(M2pwmPin, M2speed*2.5);
+    analogWrite(M1pwmPin, M1speed*2.54);
+    analogWrite(M2pwmPin, M2speed*2.54);
   }
   else { // set both motors to zero, if X&Y are within deadzone
     analogWrite(M1pwmPin, 0);
