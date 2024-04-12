@@ -119,9 +119,10 @@ void loop() {
     if (LCDinstalled) PrintToLCD();
     Serial.println("GFXtime: ");
     Serial.println(gfxTime);
-    if (gfxTime >= 50) {
+    if (gfxTime > 50) {
       Serial.println("[ERROR] GFXtime too long!");
-      LCDinstalled = false;
+      //LCDinstalled = false;
+      vScreen = -1; // set error vScreen
     } else {
       delay(50 - gfxTime);  // slow transmissions down by 50ms, accounting for time it takes to render to the display
     }
@@ -151,6 +152,7 @@ void loop() {
       Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
       failedTx++;                                             // Add one to value of failedTx, since the transmission failed
       lastTxSuccess = false;
+      PrintToLCD();
     }
     prevMillis = millis();
   }
