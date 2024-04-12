@@ -30,14 +30,23 @@
 - 2 DC Motors
 - nRF24L01
 ## Motor Shield Docs
-The shield is built to directly interface pins 10, 11, 12, 13 to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
+The shield is built to directly interface pins `10, 11, 12, 13` to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
 
-Since the arduino uno has hardware PWM on pins 3, 5, 6, 9, 10, 11, we can use these pins instead by bending the shield pins to the side so we can connect them manually to the arduino.
+Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use these pins instead by bending the shield pins to the side so we can connect them manually to the arduino.
 - [Ardiuno](https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/)
 - [L298P Motor Driver Instructables](https://www.instructables.com/Tutorial-for-L298-2Amp-Motor-Driver-Shield-for-Ard/)
 - [Electropeak Tutorial](https://electropeak.com/learn/interfacing-l298p-h-bridge-motor-driver-shield-with-arduino/)
 - [Hands On Tech specs](http://www.handsontec.com/dataspecs/arduino-shield/L298P%20Motor%20Shield.pdf)
 - [HandsOnTech](HandsOnTec.pdf)
+## Wiring
+nRF24 `pin1` -> Arduino `Gnd`
+nRF24 `pin2`` -> Arduino `+3.3v`.  Note, if you hook it up to +5v it will probably break.
+nRF24 `pin3` -> Arduino `IOpin9`
+nRF24 `pin4` -> Arduino `IOpin10`
+nRF24 `pin5` -> Arduino `IOpin13`
+nRF24 `pin6 -> Arduino `IOpin11`
+nRF24 `pin7` -> Arduino `IOpin12`
+nRF24 `pin8` **is not required** since we are not using interrupts (IRQs), leave this pin disconnected
 # Payload Characteristics; Transmitter -> Robot
 ## Uses an array with **8** elements, numbered 0-7
 0. Value of `Joystick X` from -100 to 100
