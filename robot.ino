@@ -16,7 +16,7 @@ v2.3 fixed studdering bug caused by communications restting routine
 
 // ---RF24 settings and IO pin assignments---
 byte ChannelFrequency = 24;  //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
-byte RFpipe = 1;             //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
+byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 
 int RF_CE = 9;
 int RF_CSN = 10;
@@ -59,8 +59,8 @@ int retry = 0; // used for disabling motors if robot is disconnected for long en
 
 bool Svo1On = false;
 bool Svo2On = false;
- some boards need to wait to ensure access to serial over USB
-  }
+//some boards need to wait to ensure access to serial over USB
+void setup(){
   printf_begin();             // needed only once for printing details
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding!!"));
