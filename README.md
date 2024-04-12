@@ -33,6 +33,7 @@
 - Buzzer = `4`
 - Servo1 = `7`
 - Servo2 = `8`
+### Distance Sensors
 - x1(Leftmost Dst Sensor) = `A0`
 - x2(Middle Dst Sensor) = `A1`
 - x3(Rightmost Dst Sensor) = `A2`
@@ -53,7 +54,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 - [HandsOnTech](HandsOnTec.pdf)
 ## Wiring
 1. nRF24 `pin1` -> Arduino `Gnd`
-2. nRF24 `pin2`` -> Arduino `+3.3v`.  Note, if you hook it up to +5v it will probably break.
+2. nRF24 `pin2` -> Arduino `+3.3v`.  Note, if you hook it up to +5v it will probably break.
 3. nRF24 `pin3` -> Arduino `IOpin9`
 4. nRF24 `pin4` -> Arduino `IOpin10`
 5. nRF24 `pin5` -> Arduino `IOpin13`
