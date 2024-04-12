@@ -48,7 +48,14 @@ int Svo2pin=15;
 Servo Servo1;  // create instance of servo
 Servo Servo2; // create instance of servo
 
-int retry = 0;
+//---Distance Sensor Vars---
+int const trigger = 8; // specify pin used to trigger distance sensors, connect this to all of them
+int const x1Pin = A0; // Pin for leftmost distance sensor echo
+int const x2Pin = A1; // Pin for middle distance sensor echo
+int const x3Pin = A2; // Pin for rightmost distance sensor echo
+long pulseDuration;
+
+int retry = 0; // used for disabling motors if robot is disconnected for long enough
 
 
 void setup() {
