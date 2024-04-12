@@ -52,7 +52,8 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 - [Electropeak Tutorial](https://electropeak.com/learn/interfacing-l298p-h-bridge-motor-driver-shield-with-arduino/)
 - [Hands On Tech specs](http://www.handsontec.com/dataspecs/arduino-shield/L298P%20Motor%20Shield.pdf)
 - [HandsOnTech](HandsOnTec.pdf)
-## Wiring
+# Wiring
+## nRF24
 1. nRF24 `pin1` -> Arduino `Gnd`
 2. nRF24 `pin2` -> Arduino `+3.3v`.  Note, if you hook it up to +5v it will probably break.
 3. nRF24 `pin3` -> Arduino `IOpin9`
@@ -61,6 +62,21 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 6. nRF24 `pin6` -> Arduino `IOpin11`
 7. nRF24 `pin7` -> Arduino `IOpin12`
 8. nRF24 `pin8` **is not required** since we are not using interrupts (IRQs), leave this pin disconnected
+## Motor Shield
+The shield is built to directly interface pins `10, 11, 12, 13` to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
+
+Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use these pins instead by bending the shield pins to the side so we can connect them manually to the arduino.
+- `IOpin2` -> `IOpin12`
+- `IOpin3` -> `IOpin13`
+- `IOpin5` -> `IOpin11`
+- `IOpin6` -> `IOpin10`
+## Battery
+- We are using rechargeable power drill batteries.  Get a 3D printed battery mount and terminal contacts from Mr. Mayer
+- Solder stranded wire to two right angle terminal tabs.
+- Insert the tabs into the 3D printed mount, be sure the red wire is on the + side and the black wire is on the - side.
+- Mount the 3D printed mount on your robot, there are lots of mounting holes.
+- Connect the power wires to the 2 positiong blue screw terminal block.  The black wire goes into the GND terminal, the red wire goes into VMS.
+- Note, the power entering here powers everything as long as the OPT jumper is installed on the Motor Shield.  That jumper interconnects the motor power to the Arduino power.
 # Payload Characteristics; Transmitter -> Robot
 ## Uses an array with **8** elements, numbered 0-7
 0. Value of `Joystick X` from -100 to 100
