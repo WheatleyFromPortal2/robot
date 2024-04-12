@@ -14,7 +14,7 @@ v2.3 fixed studdering bug caused by communications restting routine
 #include <RF24.h>
 #include <Servo.h>
 
-// RF24 settings and IO pin assignments
+// ---RF24 settings and IO pin assignments---
 byte ChannelFrequency = 24;  //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
 byte RFpipe = 1;             //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 
@@ -27,7 +27,7 @@ uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", 
 int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = {0, 0,-1 , -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
   
-
+bool goodSignal
 
 // motor control io pin assignments
 int M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
@@ -185,9 +185,11 @@ void sendAckData(){
   bool goodSignal = radio.testRPD();
   if (goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
     ackData[7] = 1;
+    Serial.println("Strong signal > -64dBm");
   }
   else {
     ackData[7] = 0;
+    Serial.println("Weak signal < -64dBm");
   }
   Serial.println("Writing ackData");
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
