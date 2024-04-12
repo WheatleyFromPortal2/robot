@@ -44,7 +44,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 3. nRF24 `pin3` -> Arduino `IOpin9`
 4. nRF24 `pin4` -> Arduino `IOpin10`
 5. nRF24 `pin5` -> Arduino `IOpin13`
-6. nRF24 `pin6 -> Arduino `IOpin11`
+6. nRF24 `pin6` -> Arduino `IOpin11`
 7. nRF24 `pin7` -> Arduino `IOpin12`
 8. nRF24 `pin8` **is not required** since we are not using interrupts (IRQs), leave this pin disconnected
 # Payload Characteristics; Transmitter -> Robot
