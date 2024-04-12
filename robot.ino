@@ -26,8 +26,7 @@ RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
 int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = {0, 0,-1 , -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
-  
-bool goodSignal;
+
 int BUZZER = 4;
 // motor control io pin assignments
 int M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
@@ -164,6 +163,8 @@ void controlRobot() {
       M1speed= 100; 
       M2speed= 100;
     }
+    Serial.println("M1Speed: ");
+    Serial.println("M2Speed: ");
     digitalWrite(M1dirPin, M1dir);
     digitalWrite(M2dirPin, M2dir);
     analogWrite(M1pwmPin, M1speed*2.54);
@@ -201,15 +202,6 @@ void sendAckData(){
   ackData[1]= M2speed; 
   ackData[5]= Servo1.read(); 
   ackData[6]= Servo2.read(); 
-  bool goodSignal = radio.testCarrier();
-  if (goodSignal == true) { // Check the signal strength and write "1" if it si good, and "0" if its bad to ackData[0]
-    ackData[7] = 1;
-    Serial.println("Strong signal > -64dBm");
-  }
-  else {
-    ackData[7] = 0;
-    Serial.println("Weak signal < -64dBm");
-  }
   Serial.println("Writing ackData");
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
 }
