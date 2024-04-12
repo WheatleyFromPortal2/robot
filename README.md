@@ -29,6 +29,19 @@
 - Motor Shield
 - 2 DC Motors
 - nRF24L01
+## Pin Assignments
+- Buzzer = `4`
+- Servo1 = `7`
+- Servo2 = `8`
+- x1(Leftmost Dst Sensor) = `A0`
+- x2(Middle Dst Sensor) = `A1`
+- x3(Rightmost Dst Sensor) = `A2`
+- Trigger(for activating dst sensors) = `A3`
+### Motor Shield Pins
+- ENA = `5`
+- INA = `3`
+- ENB = `6`
+- INB = `2`
 ## Motor Shield Docs
 The shield is built to directly interface pins `10, 11, 12, 13` to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
 
