@@ -192,7 +192,7 @@ void controlRobot() {
     Svo2On = false; // Servo2 is no longer extended
   }
   if (payload[3]==0) digitalWrite(BUZZER, HIGH);  //turn on buzzer
-      else digitalWrite(BUZZER, LOW); // turn off buzzer
+  else digitalWrite(BUZZER, LOW); // turn off buzzer
 }
 void sendAckData(){
   ackData[0] = M1speed; 

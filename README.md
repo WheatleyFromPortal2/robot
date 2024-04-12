@@ -31,13 +31,13 @@
 - nRF24L01
 ## Pin Assignments
 - BUZZER = `4`
-- Servo1 = `7`
-- Servo2 = `8`
+- Servo1 = `A0`
+- Servo2 = `A1`
 ### Distance Sensors
-- x1(Leftmost Dst Sensor) = `A0`
-- x2(Middle Dst Sensor) = `A1`
-- x3(Rightmost Dst Sensor) = `A2`
-- Trigger(for activating dst sensors) = `A3`
+- x1(Leftmost Dst Sensor) = `TBD`
+- x2(Middle Dst Sensor) = `TBD`
+- x3(Rightmost Dst Sensor) = `8`
+- Trigger(for activating dst sensors) = `7`
 ### Motor Shield Pins
 - ENA = `5`
 - INA = `3`
