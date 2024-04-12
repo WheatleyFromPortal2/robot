@@ -78,7 +78,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 - Insert the tabs into the 3D printed mount, be sure the red wire is on the + side and the black wire is on the - side.
 - Mount the 3D printed mount on your robot, there are lots of mounting holes.
 - Connect the power wires to the 2 positiong blue screw terminal block.  The black wire goes into the GND terminal, the red wire goes into VMS.
-- Note, the power entering here powers everything as long as the OPT jumper is installed on the Motor Shield.  That jumper interconnects the motor power to the Arduino power.
+- Note, the power entering here powers everything **as long as the OPT jumper is installed on the Motor Shield**.  That jumper interconnects the motor power to the Arduino power.
 # Payload Characteristics; Transmitter -> Robot
 ## Uses an array with **8** elements, numbered 0-7
 0. Value of `Joystick X` from -100 to 100
