@@ -185,3 +185,20 @@ void sendAckData(){
   Serial.println("Writing ackData");
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
 }
+void distances(){ // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
+  digitalWrite(trigger, HIGH); // trigger the HC-SR04s
+  delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
+  digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
+  pulseDuration = pulseIn(x1Pin, HIGH); // find time of pulse for x1
+  ackData[2] = pulseDuration * 0.0171; // find distance in cm for x1
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  pulseDuration = pulseIn(x2Pin, HIGH); // find time of pulse for x2
+  ackData[3] = pulseDuration * 0.0171; // find distance in cm for x2
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  pulseDuration = pulseIn(x3Pin, HIGH); // find time of pulse for x3
+  ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
+}
