@@ -98,4 +98,4 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 4. `x3` Distance value for rightmost distance sensor (centimeters)
 5. `servo1` Rotation of leftmost servo (degrees)
 6. `servo2` Rotation of rightmost servo (degrees)
-7. `ackConnect` Value of connection quality from robot (0-1)
+7. Not used, maybe battery?
