@@ -70,17 +70,17 @@ void setup() {
     Serial.println(F("radio hardware is not responding!!"));
     while (1) {}  // hold in infinite loop
   }
-  radio.setDataRate(RF24_250KBPS);
+  radio.setDataRate(RF24_250KBPS); 
 
-  radio.enableAckPayload();
+  radio.enableAckPayload(); // enables sending data back to transmitter
 
   radio.setChannel(ChannelFrequency);  // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);       // RF24_PA_MAX is default.
-  radio.setPayloadSize(sizeof(payload));
-  radio.openReadingPipe(RFpipe, address[RFpipe]);
+  radio.setPayloadSize(sizeof(payload)); // set the payload size, must be < 32bytes
+  radio.openReadingPipe(RFpipe, address[RFpipe]); // open the pipe for reading from the radio
   radio.startListening();                               // put radio in RX mode
-  radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load dat
-  pinMode(4, OUTPUT);
+  radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
+  pinMode(4, OUTPUT); // set buzzer pin to output
 
   payload[0] = 0;  // this code puts in default values for the payload
   payload[1] = 0;
@@ -171,11 +171,23 @@ void controlRobot() {
 
 
   // These last lines show how to make hobby servo go to a position when button press is received
-
-  if (payload[2] == 0) Servo1.write(10);  //send test hobby servo to position 10 when button A is pressed
-  else Servo1.write(180);                 //send test hobby servo to position 180 When button A is not pressed
-  if (payload[3] == 0) Servo2.write(10);  //turn on buzzer
-  else Servo2.write(180);
+  //---Servo Control---
+  if (payload[2]==0 && !Svo1On){ // buttonA pressed, and Servo1 is not extended
+    Servo1.write(180); // extend Servo1
+    Svo1On = true; // Servo1 is now extended
+  }
+  if (payload[2]==1 && Svo1On){ // buttonA not pressed, and Servo1 extended
+    Servo1.write(10); // unextend Servo1
+    Svo1On = false; // Servo1 is no longer extended
+  }
+  if (payload[3]==0 && !Svo2On){ // buttonB pressed, and Servo2 is not extended
+    Servo2.write(180); // extend Servo2
+    Svo2On = true; // Servo2 is now extended
+  }
+  if (payload[3]==1 && Svo2On){ // buttonB not pressed, and Servo2 extended
+    Servo2.write(10); // unextend Servo2
+    Svo2On = false; // Servo2 is no longer extended
+  }
 }
 void sendAckData(){
   ackData[0] = M1speed*M1dir; 
