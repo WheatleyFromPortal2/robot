@@ -43,16 +43,16 @@ bool M1dir=1;
 bool M2dir=1;
 
 // Hobby Servo io pin assignments
-int Svo1pin = 14;
-int Svo2pin=15; 
+int Svo1pin = A0;
+int Svo2pin= A1; 
 Servo Servo1;  // create instance of servo
 Servo Servo2; // create instance of servo
 
 //---Distance Sensor Vars---
-int const trigger = 8; // specify pin used to trigger distance sensors, connect this to all of them
-int const x1Pin = A0; // Pin for leftmost distance sensor echo
-int const x2Pin = A1; // Pin for middle distance sensor echo
-int const x3Pin = A2; // Pin for rightmost distance sensor echo
+int const trigger = 7; // specify pin used to trigger distance sensors, connect this to all of them
+int const x1Pin = -1; // Pin for leftmost distance sensor echo
+int const x2Pin = -1; // Pin for middle distance sensor echo
+int const x3Pin = 8; // Pin for rightmost distance sensor echo
 long pulseDuration;
 
 int retry = 0; // used for disabling motors if robot is disconnected for long enough
@@ -67,6 +67,8 @@ void setup(){
     Serial.println(F("radio hardware is not responding!!"));
     while (1) {}  // hold in infinite loop
   }
+  Servo1.attach(Svo1pin);
+  Servo2.attach(Svo2pin);
   radio.setDataRate(RF24_250KBPS); 
 
   radio.enableAckPayload(); // enables sending data back to transmitter
