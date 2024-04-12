@@ -27,7 +27,7 @@ uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", 
 int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = {0, 0,-1 , -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
   
-bool goodSignal
+bool goodSignal;
 
 // motor control io pin assignments
 int M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
