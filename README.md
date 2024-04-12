@@ -8,11 +8,13 @@
 - Hunter Dorrill
 # Hardware
 - 2 Arduino Unos (or compatable clones)
+- 2 nRF24L01
 - [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
-- 9g Micro Servo (IO Pin 9)
+- [L298P Motor Shield](https://protosupplies.com/product/l298p-motor-driver-shield/)
 # Transmitter
-- Uses Fundiuno Shield
-- Uses same RF24 Module
+- Ardiuno Uno
+- [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
+- nRF24L01
 ## Pin Assignments
 - Joystick X = `A0`
 - Joystick Y =`A1`
@@ -22,8 +24,22 @@
 - Button D = `5`
 - Button E = `6`
 - Button F = `7`
-## Payload Characteristics
-### Uses an array with **8** elements, numbered 0-7
+# Robot
+- Ardiuno Uno
+- Motor Shield
+- 2 DC Motors
+- nRF24L01
+## Motor Shield Docs
+The shield is built to directly interface pins 10, 11, 12, 13 to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
+
+Since the arduino uno has hardware PWM on pins 3, 5, 6, 9, 10, 11, we can use these pins instead by bending the shield pins to the side so we can connect them manually to the arduino.
+- [Ardiuno](https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/)
+- [L298P Motor Driver Instructables](https://www.instructables.com/Tutorial-for-L298-2Amp-Motor-Driver-Shield-for-Ard/)
+- [Electropeak Tutorial](https://electropeak.com/learn/interfacing-l298p-h-bridge-motor-driver-shield-with-arduino/)
+- [Hands On Tech specs](http://www.handsontec.com/dataspecs/arduino-shield/L298P%20Motor%20Shield.pdf)
+- [HandsOnTech](HandsOnTec.pdf)
+# Payload Characteristics; Transmitter -> Robot
+## Uses an array with **8** elements, numbered 0-7
 0. Value of `Joystick X` from -100 to 100
 1. Value of `Joystick Y` from -100 to 100
 2. Value of `Button A`
@@ -32,8 +48,8 @@
 5. Value of `Button D`
 6. Value of `Button E`
 7. Value of `Button F`
-## ackData Characteristics, used for sending data back to transmitter
-### Uses an array of **8** elements, numbered 0-7
+# ackData Characteristics; Robot -> Transmitter
+## Uses an array of **8** elements, numbered 0-7
 0. `motorA` Motor A power percent (0-100)
 1. `motorB` Motor B power percent (0-100)
 2. `x1` Distance value for leftmost distance sensor (centimeters)
@@ -42,18 +58,6 @@
 5. `servo1` Rotation of leftmost servo (degrees)
 6. `servo2` Rotation of rightmost servo (degrees)
 7. `ackConnect` Value of connection quality from robot (0-1)
-## Fundiuno Schematic
-![schematic from cb-electronics.com](schematic.png)
-# Motor Shield Docs
-The shield is built to directly interface pins 10, 11, 12, 13 to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module so we must use different motor control pins.
-
-
-Since the arduino uno has hardware PWM on pins 3, 5, 6, 9, 10, 11, we can use these pins instead by bending the shield pins to the side so we can connect them manually to the arduino.
-- [Ardiuno](https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/)
-- [L298P Motor Driver Instructables](https://www.instructables.com/Tutorial-for-L298-2Amp-Motor-Driver-Shield-for-Ard/)
-- [Electropeak Tutorial](https://electropeak.com/learn/interfacing-l298p-h-bridge-motor-driver-shield-with-arduino/)
-- [Hands On Tech specs](http://www.handsontec.com/dataspecs/arduino-shield/L298P%20Motor%20Shield.pdf)
-- [HandsOnTech](HandsOnTec.pdf)
 # Motor Shield Example
 ## Copied from [Proto Supplies](https://protosupplies.com/product/l298p-motor-driver-shield/)
 
