@@ -54,6 +54,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 - [HandsOnTech](HandsOnTec.pdf)
 # Wiring
 ## nRF24
+![nRF24](nRF24.png)
 1. nRF24 `pin1` -> Arduino `Gnd`
 2. nRF24 `pin2` -> Arduino `+3.3v`.  Note, if you hook it up to +5v it will probably break.
 3. nRF24 `pin3` -> Arduino `IOpin9`
@@ -62,6 +63,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 6. nRF24 `pin6` -> Arduino `IOpin11`
 7. nRF24 `pin7` -> Arduino `IOpin12`
 8. nRF24 `pin8` **is not required** since we are not using interrupts (IRQs), leave this pin disconnected
+![nRF24Diagram](RF24Diagram.png)
 ## Motor Shield
 The shield is built to directly interface pins `10, 11, 12, 13` to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
 
