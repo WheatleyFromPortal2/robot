@@ -59,6 +59,7 @@ int retry = 0; // used for disabling motors if robot is disconnected for long en
 
 bool Svo1On = false;
 bool Svo2On = false;
+int deadzone = 10; // set deadzone to 10
 //some boards need to wait to ensure access to serial over USB
 void setup(){
   printf_begin();             // needed only once for printing details
@@ -129,41 +130,47 @@ void getData() {
   }
 }
 void controlRobot() {
-  if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
-    if (payload[0]>50){
-      M1speed = (payload[0]-50)*7/5+30; 
-      M2speed = (payload[0]-50)*7/5+30; 
-      M1dir= 1; 
-      M2dir= 0;
+  if !(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone){
+    if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
+      if (payload[0]>50){
+        M1speed = (payload[0]-50)*7/5+30; 
+        M2speed = (payload[0]-50)*7/5+30; 
+        M1dir= 1; 
+        M2dir= 0;
+      }
+      else{
+        M1speed = (payload[0]*-1-50)*7/5+30; 
+        M2speed = (payload[0]*-1-50)*7/5+30; 
+        M1dir= 0; 
+        M2dir= 1;
+      }
+      
     }
-    else{
-      M1speed = (payload[0]*-1-50)*7/5+30; 
-      M2speed = (payload[0]*-1-50)*7/5+30; 
-      M1dir= 0; 
-      M2dir= 1;
+    if (payload[1]>50){
+        M1speed = (payload[1]-50)*7/5+30; 
+        M2speed = (payload[1]-50)*7/5+30; 
+        M1dir= 1; 
+        M2dir= 1;
     }
-    
+    if (payload[1]<-50){
+        M1speed = (payload[1]*-1-50)*7/5+30; 
+        M2speed = (payload[1]*-1-50)*7/5+30; 
+        M1dir= 0; 
+        M2dir= 0; 
+    }
+    if (payload[4]){
+      M1speed=100; 
+      M2speed= 100;
+    }
+    digitalWrite(M1dirPin, M1dir);
+    digitalWrite(M2dirPin, M2dir);
+    analogWrite(M1pwmPin, M1speed*2.5);
+    analogWrite(M2pwmPin, M2speed*2.5);
   }
-  if (payload[1]>50){
-      M1speed = (payload[1]-50)*7/5+30; 
-      M2speed = (payload[1]-50)*7/5+30; 
-      M1dir= 1; 
-      M2dir= 1;
+  else { // set both motors to zero, if X&Y are within deadzone
+    analogWrite(M1pwmPin, 0);
+    analogWrite(M2pwmPin, 0);
   }
-  if (payload[1]<-50){
-      M1speed = (payload[1]*-1-50)*7/5+30; 
-      M2speed = (payload[1]*-1-50)*7/5+30; 
-      M1dir= 0; 
-      M2dir= 0;
-  }
-  if (payload[4]){
-    M1speed=100; 
-    M2speed= 100;
-  }
-  digitalWrite(M1dirPin, M1dir);
-  digitalWrite(M2dirPin, M2dir);
-  analogWrite(M1pwmPin, M1speed*2.5);
-  analogWrite(M2pwmPin, M2speed*2.5);
 
 
   // These last lines show how to make hobby servo go to a position when button press is received
