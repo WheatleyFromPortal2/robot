@@ -54,7 +54,6 @@ bool lastTxSuccess;
 bool lastRxSuccess;
 int txPercent;
 int vScreen = 0;
-int signal;
 bool goodSignal;
 void setup() {
 
@@ -108,12 +107,6 @@ void loop() {
       Serial.print(",");
       newData = false;
     }
-    // find signal strength
-    goodSignal = radio.testCarrier();
-    if (radio.available()) {
-      Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm");
-      radio.read(&payload, sizeof(payload));
-    }
     PrintToLCD();
     Serial.println("GFXtime: ");
     Serial.println(gfxTime);
@@ -155,18 +148,6 @@ void loop() {
   }
 
   void PrintToLCD() {
-    if (goodSignal){
-      if (ackData[7] == 1){
-        signal = 100;
-      }
-      else signal = 75;
-    }
-    else {
-      if (ackData[7] == 1){
-        signal = 50;
-      }
-      else signal = 25;
-    }
     u8g2.firstPage();
     do {
       gfxTime = millis();
@@ -206,9 +187,6 @@ void loop() {
         u8g2.print(txPercent);
         u8g2.print("%");
         u8g2.setCursor(0, 38);
-        u8g2.print("Sig:");
-        u8g2.print(signal);
-        u8g2.print("%");
       } else if (vScreen == 1) {
         // this displays the proximity data
         //u8g2.clearDisplay();
