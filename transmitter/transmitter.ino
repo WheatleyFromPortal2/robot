@@ -55,7 +55,6 @@ long unsigned int failedTx;
 bool lastTxSuccess;
 bool lastRxSuccess;
 int txPercent;
-int displayMode = 1;
 int vScreen = 0;
 int signal;
 bool goodSignal;
@@ -117,10 +116,6 @@ void loop() {
       Serial.println(goodSignal ? "Strong signal > -64dBm" : "Weak signal < -64dBm");
       radio.read(&payload, sizeof(payload));
     }
-    if (digitalRead(ButtonE) == 0) {
-      displayMode++;
-      displayMode = displayMode % 2;
-    }
     if (LCDinstalled) PrintToLCD();
     Serial.println("GFXtime: ");
     Serial.println(gfxTime);
@@ -177,7 +172,11 @@ void loop() {
     do {
       gfxTime = millis();
       txPercent = ((successfulTx / (successfulTx + failedTx))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
-
+      if (vScreen == -1) {
+        u8g2.setFont(u8g2_font_profont11_mf);
+        u8g2.setCursor(0,8);
+        u8g2.print("Disconnected");
+      }
       if (vScreen == 0) {  // Raw Data vScreen
         u8g2.setFont(u8g2_font_profont11_mf);
         //u8g2.clearDisplay();
