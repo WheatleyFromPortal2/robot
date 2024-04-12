@@ -28,7 +28,7 @@ int payload[8];  // array to hold received data.  See transmitter code to view w
 int ackData[8] = {0, 0,-1 , -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
   
 bool goodSignal;
-
+int BUZZER = 4;
 // motor control io pin assignments
 int M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
 int M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is default
@@ -57,13 +57,9 @@ long pulseDuration;
 
 int retry = 0; // used for disabling motors if robot is disconnected for long enough
 
-
-void setup() {
-  Servo1.attach(Svo1pin);
-  Servo2.attach(Svo2pin);
-  Serial.begin(115200);
-  while (!Serial) {
-    // some boards need to wait to ensure access to serial over USB
+bool Svo1On = false;
+bool Svo2On = false;
+ some boards need to wait to ensure access to serial over USB
   }
   printf_begin();             // needed only once for printing details
   if (!radio.begin()) {
@@ -80,7 +76,7 @@ void setup() {
   radio.openReadingPipe(RFpipe, address[RFpipe]); // open the pipe for reading from the radio
   radio.startListening();                               // put radio in RX mode
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
-  pinMode(4, OUTPUT); // set buzzer pin to output
+  pinMode(BUZZER, OUTPUT); // set buzzer pin to output
 
   payload[0] = 0;  // this code puts in default values for the payload
   payload[1] = 0;
@@ -122,9 +118,9 @@ void getData() {
         payload[x] = 1;
       }
       for (int x = 0; x < 3; x++) {  //beep 3 times quickly so user knows communication was lost
-        digitalWrite(4, HIGH);
+        digitalWrite(BUZZER, HIGH);
         delay(100);
-        digitalWrite(4, LOW);
+        digitalWrite(BUZZER, LOW);
         delay(100);
       }
       resetFunc();  //reset the arduino so maybe it will regain communication
@@ -188,8 +184,8 @@ void controlRobot() {
     Servo2.write(10); // unextend Servo2
     Svo2On = false; // Servo2 is no longer extended
   }
-  if (payload[3]==0) digitalWrite(4, HIGH);  //turn on buzzer
-      else digitalWrite(4, LOW); // turn off buzzer
+  if (payload[3]==0) digitalWrite(BUZZER, HIGH);  //turn on buzzer
+      else digitalWrite(BUZZER, LOW); // turn off buzzer
 }
 void sendAckData(){
   ackData[0] = M1speed*M1dir; 
