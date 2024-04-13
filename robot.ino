@@ -53,7 +53,7 @@ int const x1Pin = -1; // Pin for leftmost distance sensor echo
 int const x2Pin = -1; // Pin for middle distance sensor echo
 int const x3Pin = 8; // Pin for rightmost distance sensor echo
 long pulseDuration;
-
+int boost = 1;
 int retry = 0; // used for disabling motors if robot is disconnected for long enough
 
 int Svo1pos = 0;
@@ -143,38 +143,35 @@ void controlRobot() {
   else { // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)){
       if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
-        if (payload[0]<50){
-          M1speed = (payload[0]-90)*7/5+30; 
+        if (payload[0]>50){
+          M1speed = (payload[0]-90)*7/5+30;  
           M2speed = (payload[0]-75)*7/5+30; 
-          M1dir= 1; 
-          M2dir= 0;
-        }
-        else{
-          M1speed = (payload[0]*-1-90)*7/5+30; 
-          M2speed = (payload[0]*-1-90)*7/5+30; 
           M1dir= 0; 
           M2dir= 1;
         }
-        
+        else{
+          M1speed = (payload[0]*-1-90)*7/5+30;
+          M2speed = (payload[0]*-1-90)*7/5+30; 
+          M1dir= 1; 
+          M2dir= 0;
+        }
       }
       if (payload[1]>50){
           M1speed = (payload[1]-50)*7/5+30; 
-          M2speed = (payload[1]-50)*7/5+30; 
+          M2speed = (payload[1]-50)*7/5+30;
           M1dir= 1; 
           M2dir= 1;
       }
       if (payload[1]<-50){
-          M1speed = (payload[1]*-1-50)*7/5+30; 
-          M2speed = (payload[1]*-1-50)*7/5+30; 
+          M1speed = (payload[1]*-1-50)*7/5+30;
+          M2speed = (payload[1]*-1-50)*7/5+30;
           M1dir= 0; 
           M2dir= 0; 
       }
-      if (payload[4]){
-        M1speed= 100; 
-        M2speed= 100;
-      }
       Serial.println("M1Speed: ");
+      Serial.println(M1speed);
       Serial.println("M2Speed: ");
+      Serial.println(M2speed);
       digitalWrite(M1dirPin, M1dir);
       digitalWrite(M2dirPin, M2dir);
       analogWrite(M1pwmPin, M1speed*2.54);
@@ -183,12 +180,16 @@ void controlRobot() {
     else { // set both motors to zero, if X&Y are within deadzone
       analogWrite(M1pwmPin, 0);
       analogWrite(M2pwmPin, 0);
+      M1speed = 0;
+      M2speed = 0;
     }
   }
 }
 void sendAckData(){
+  if (M1dir == 0) M1speed = M1speed * -1; // make M1speed negative if the direction is backwards
+  if (M2dir == 0) M2speed = M2speed * -1; // make M2speed negative if the direction is backwards
   ackData[0] = M1speed; 
-  ackData[1]= M2speed; 
+  ackData[1] = M2speed; 
   ackData[5]= Servo1.read(); 
   ackData[6]= Servo2.read(); 
   Serial.println("Writing ackData");

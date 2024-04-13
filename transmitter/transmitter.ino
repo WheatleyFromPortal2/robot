@@ -211,8 +211,8 @@ void loop() {
       } else if (vScreen == 2) {
         // this displays a bar graph (most likely motor speed)//*
         //u8g2.clearDisplay();
-        int graphH1 = ackData[0] * .48;
-        int graphH2 = ackData[1] * .48;
+        int graphH1 = abs(ackData[0]) * .48;
+        int graphH2 = abs(ackData[1]) * .48;
         u8g2.drawFrame(0, 12, 12, 52);
         u8g2.drawBox(2, 62 - graphH1, 8, graphH1);
 
@@ -222,8 +222,14 @@ void loop() {
         u8g2.setFont(u8g2_font_profont11_mf);
         u8g2.setCursor(1, 7);
         u8g2.print("M1");
+        u8g2.setCursor(0, 40);
+        if (ackData[0] > 0) u8g2.print("/\\");
+        else if (ackData[0] < 0) u8g2.print("\\/");
         u8g2.setCursor(19, 7);
         u8g2.print("M2");
+        u8g2.setCursor(18, 40);
+        if (ackData[1] > 0) u8g2.print("/\\");
+        else if (ackData[1] < 0) u8g2.print("\\/");
         // draws a dial for servo position
         u8g2.drawCircle(55, 26, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
         u8g2.drawDisc(55, 26, 2);
