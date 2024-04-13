@@ -50,8 +50,8 @@ Servo Servo2; // create instance of servo
 //---Distance Sensor Vars---
 int const trigger = 7; // specify pin used to trigger distance sensors, connect this to all of them
 int const x1Pin = -1; // Pin for leftmost distance sensor echo
-int const x2Pin = -1; // Pin for middle distance sensor echo
-int const x3Pin = 8; // Pin for rightmost distance sensor echo
+int const x2Pin = 8; // Pin for middle distance sensor echo
+int const x3Pin = -1; // Pin for rightmost distance sensor echo
 long pulseDuration;
 int boost = 1;
 int retry = 0; // used for disabling motors if robot is disconnected for long enough
@@ -94,6 +94,7 @@ void (*resetFunc)(void) = 0;  //declare reset function at address 0
 void loop() {
   getData();
   controlRobot();
+  //distances();
   sendAckData(); 
 }
 void getData() {
@@ -196,19 +197,19 @@ void sendAckData(){
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
 }
 void distances(){ // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
-  digitalWrite(trigger, HIGH); // trigger the HC-SR04s
-  delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
-  digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
-  pulseDuration = pulseIn(x1Pin, HIGH); // find time of pulse for x1
-  ackData[2] = pulseDuration * 0.0171; // find distance in cm for x1
+  //digitalWrite(trigger, HIGH); // trigger the HC-SR04s
+  //delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
+  //digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
+  //pulseDuration = pulseIn(x1Pin, HIGH); // find time of pulse for x1
+  //ackData[2] = pulseDuration * 0.0171; // find distance in cm for x1
   digitalWrite(trigger, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigger, LOW);
   pulseDuration = pulseIn(x2Pin, HIGH); // find time of pulse for x2
   ackData[3] = pulseDuration * 0.0171; // find distance in cm for x2
-  digitalWrite(trigger, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigger, LOW);
-  pulseDuration = pulseIn(x3Pin, HIGH); // find time of pulse for x3
-  ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
+  //digitalWrite(trigger, HIGH);
+  //delayMicroseconds(10);
+  //digitalWrite(trigger, LOW);
+  //pulseDuration = pulseIn(x3Pin, HIGH); // find time of pulse for x3
+  //ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
 }
