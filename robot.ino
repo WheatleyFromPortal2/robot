@@ -24,8 +24,8 @@ int RF_CSN = 10;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
-int payload[8];  // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
-int ackData[8] = {0, 0,-1 , -1, -1, -1, -1, -1}; // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
+int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
+int ackData[8] = { 0, 0, -1, -1, -1, -1, -1, -1 };  // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
 
 int BUZZER = 4;
 // motor control io pin assignments
@@ -38,48 +38,57 @@ int M2dirPin = 2;  //IOpin assignment, direction for motor2. IO pin13 is default
 int M1speed = 0;  // variable holding speed of motor, value of 0-100
 int M2speed = 0;  // variable holding speed of motor, value of 0-100
 
-bool M1dir=1;
-bool M2dir=1;
+bool M1dir = 1;
+bool M2dir = 1;
+
+float S;
+float T;
+float maximum;
+float total;
+float diff;
 
 // Hobby Servo io pin assignments
 int Svo1pin = A0;
-int Svo2pin= A1; 
+int Svo2pin = A1;
 Servo Servo1;  // create instance of servo
-Servo Servo2; // create instance of servo
+Servo Servo2;  // create instance of servo
 
 //---Distance Sensor Vars---
-int const trigger = 7; // specify pin used to trigger distance sensors, connect this to all of them
-int const x1Pin = -1; // Pin for leftmost distance sensor echo
-int const x2Pin = 8; // Pin for middle distance sensor echo
-int const x3Pin = -1; // Pin for rightmost distance sensor echo
+int const trigger = 7;  // specify pin used to trigger distance sensors, connect this to all of them
+int const x1Pin = -1;   // Pin for leftmost distance sensor echo
+int const x2Pin = 8;    // Pin for middle distance sensor echo
+int const x3Pin = -1;   // Pin for rightmost distance sensor echo
 long pulseDuration;
 int boost = 1;
-int retry = 0; // used for disabling motors if robot is disconnected for long enough
-
+int retry = 0;  // used for disabling motors if robot is disconnected for long enough
 int Svo1pos = 0;
 int Svo2pos = 0;
-int deadzone = 10; // set deadzone to 10
+int deadzone = 10;  // set deadzone to 10
 //some boards need to wait to ensure access to serial over USB
 
-void setup(){
-  printf_begin();             // needed only once for printing details
+void setup() {
+  printf_begin();  // needed only once for printing details
+  Serial.begin(115200);
+  while (!Serial) {
+    // some boards need to wait to ensure access to serial over USB
+  }
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding!!"));
     while (1) {}  // hold in infinite loop
   }
   Servo1.attach(Svo1pin);
   Servo2.attach(Svo2pin);
-  radio.setDataRate(RF24_250KBPS); 
+  radio.setDataRate(RF24_250KBPS);
 
-  radio.enableAckPayload(); // enables sending data back to transmitter
+  radio.enableAckPayload();  // enables sending data back to transmitter
 
-  radio.setChannel(ChannelFrequency);  // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
-  radio.setPALevel(RF24_PA_MAX);       // RF24_PA_MAX is default.
-  radio.setPayloadSize(sizeof(payload)); // set the payload size, must be < 32bytes
-  radio.openReadingPipe(RFpipe, address[RFpipe]); // open the pipe for reading from the radio
-  radio.startListening();                               // put radio in RX mode
+  radio.setChannel(ChannelFrequency);                        // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
+  radio.setPALevel(RF24_PA_MAX);                             // RF24_PA_MAX is default.
+  radio.setPayloadSize(sizeof(payload));                     // set the payload size, must be < 32bytes
+  radio.openReadingPipe(RFpipe, address[RFpipe]);            // open the pipe for reading from the radio
+  radio.startListening();                                    // put radio in RX mode
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
-  pinMode(BUZZER, OUTPUT); // set buzzer pin to output
+  pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
 
   payload[0] = 0;  // this code puts in default values for the payload
   payload[1] = 0;
@@ -95,7 +104,7 @@ void loop() {
   getData();
   controlRobot();
   //distances();
-  sendAckData(); 
+  sendAckData();
 }
 void getData() {
   uint8_t pipe;
@@ -133,42 +142,50 @@ void getData() {
   }
 }
 void controlRobot() {
-  if (payload[2] == 0){ // ButtonA is pressed, engage servo control
-    Svo1pos = (payload[0] + 100) * 180 / 200; // Convert X(-100 to 100) to int from 0-180
-    if (payload[0] >= 99) Svo1pos = 180; // fix for weird behaviour
-    Svo2pos = (payload[1] + 100) * 180 / 200; // Convert Y(-100 to 100) to int from 0-180
-    if (payload[1] >= 99) Svo2pos = 180; // fix for weird behaviour
+  if (payload[2] == 0) {                       // ButtonA is pressed, engage servo control
+    Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
+    if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
+    Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
+    if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour
     Servo1.write(Svo1pos);
     Servo2.write(Svo2pos);
-  }
-  else { // ButtonA isn't pressed, control motors instead
-    if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)){
-      if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
-        if (payload[0]>50){
-          M1speed = (payload[0]-90)*7/5+30;  
-          M2speed = (payload[0]-75)*7/5+30; 
-          M1dir= 0; 
-          M2dir= 1;
+  } else {  // ButtonA isn't pressed, control motors instead
+    if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {
+      S = payload[0];
+      T = payload[1];
+      maximum = max(abs(T), abs(S));
+      total = T + S;
+      diff = T - S;
+      if (T >= 0){
+        if (S >= 0){ // I quadrant
+          M1speed = maximum;
+          M2speed = diff;
         }
-        else{
-          M1speed = (payload[0]*-1-90)*7/5+30;
-          M2speed = (payload[0]*-1-90)*7/5+30; 
-          M1dir= 1; 
-          M2dir= 0;
+        else { // II quadrant
+          M1speed = total;
+          M2speed = maximum;
         }
       }
-      if (payload[1]>50){
-          M1speed = (payload[1]-50)*7/5+30; 
-          M2speed = (payload[1]-50)*7/5+30;
-          M1dir= 1; 
-          M2dir= 1;
+      else {
+        if (S >= 0){ // IV quadrant
+          M1speed = total;
+          M2speed = maximum * -1;
+        }
+        else { // III quadrant
+          M1speed = maximum * -1;
+          M2speed = diff;
+        }
       }
-      if (payload[1]<-50){
-          M1speed = (payload[1]*-1-50)*7/5+30;
-          M2speed = (payload[1]*-1-50)*7/5+30;
-          M1dir= 0; 
-          M2dir= 0; 
+      if (M1speed < 0){
+        M1speed *= -1;
+        M1dir = 1;
       }
+      else M1dir = 0;
+      if (M2speed < 0){
+        M2speed *= -1;
+        M2dir = 1;
+      }
+      else M2dir = 0;
       Serial.println("M1Speed: ");
       Serial.println(M1speed);
       Serial.println("M2Speed: ");
@@ -177,8 +194,7 @@ void controlRobot() {
       digitalWrite(M2dirPin, M2dir);
       analogWrite(M1pwmPin, M1speed*2.54);
       analogWrite(M2pwmPin, M2speed*2.54);
-    }
-    else { // set both motors to zero, if X&Y are within deadzone
+    } else {  // set both motors to zero, if X&Y are within deadzone
       analogWrite(M1pwmPin, 0);
       analogWrite(M2pwmPin, 0);
       M1speed = 0;
@@ -186,17 +202,17 @@ void controlRobot() {
     }
   }
 }
-void sendAckData(){
-  if (M1dir == 0) M1speed = M1speed * -1; // make M1speed negative if the direction is backwards
-  if (M2dir == 0) M2speed = M2speed * -1; // make M2speed negative if the direction is backwards
-  ackData[0] = M1speed; 
-  ackData[1] = M2speed; 
-  ackData[5]= Servo1.read(); 
-  ackData[6]= Servo2.read(); 
+void sendAckData() {
+  if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
+  if (M2dir == 0) M2speed = M2speed * -1;  // make M2speed negative if the direction is backwards
+  ackData[0] = M1speed;
+  ackData[1] = M2speed;
+  ackData[5] = Servo1.read();
+  ackData[6] = Servo2.read();
   Serial.println("Writing ackData");
-  radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData)); // load the payload for the next time
+  radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // load the payload for the next time
 }
-void distances(){ // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
+void distances() {  // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
   //digitalWrite(trigger, HIGH); // trigger the HC-SR04s
   //delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
   //digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
@@ -205,8 +221,8 @@ void distances(){ // Calculate distances from distance sensors and put into ackD
   digitalWrite(trigger, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigger, LOW);
-  pulseDuration = pulseIn(x2Pin, HIGH); // find time of pulse for x2
-  ackData[3] = pulseDuration * 0.0171; // find distance in cm for x2
+  pulseDuration = pulseIn(x2Pin, HIGH);  // find time of pulse for x2
+  ackData[3] = pulseDuration * 0.0171;   // find distance in cm for x2
   //digitalWrite(trigger, HIGH);
   //delayMicroseconds(10);
   //digitalWrite(trigger, LOW);
