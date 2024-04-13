@@ -35,8 +35,8 @@ int M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is defaul
 int M2pwmPin = 6;  //IOpin assignment, enable for motor2 (pwm on this pin). IO pin11 is default, but changed to leave SPI port available
 int M2dirPin = 2;  //IOpin assignment, direction for motor2. IO pin13 is default
 
-int M1speed = 255;  // variable holding PWM (Pulse Width Modulation) speed of motor, value of 0-255
-int M2speed = 255;  // variable holding PWM (Pulse Width Modulation) speed of motor, value of 0-255
+int M1speed = 0;  // variable holding speed of motor, value of 0-100
+int M2speed = 0;  // variable holding speed of motor, value of 0-100
 
 bool M1dir=1;
 bool M2dir=1;
