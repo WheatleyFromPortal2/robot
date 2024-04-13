@@ -35,8 +35,8 @@
 - Servo2 = `A1`
 ### Distance Sensors
 - x1(Leftmost Dst Sensor) = `TBD`
-- x2(Middle Dst Sensor) = `TBD`
-- x3(Rightmost Dst Sensor) = `8`
+- x2(Middle Dst Sensor) = `8`
+- x3(Rightmost Dst Sensor) = `TBD`
 - Trigger(for activating dst sensors) = `7`
 ### Motor Shield Pins
 - ENA = `5`
