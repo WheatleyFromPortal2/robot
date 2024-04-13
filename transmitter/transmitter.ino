@@ -55,7 +55,6 @@ bool lastRxSuccess;
 int txPercent;
 int vScreen = 0;
 void setup() {
-
   Serial.begin(115200);
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
