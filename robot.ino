@@ -56,10 +56,11 @@ long pulseDuration;
 
 int retry = 0; // used for disabling motors if robot is disconnected for long enough
 
-bool Svo1On = false;
-bool Svo2On = false;
+int Svo1pos = 0;
+int Svo2pos = 0;
 int deadzone = 10; // set deadzone to 10
 //some boards need to wait to ensure access to serial over USB
+
 void setup(){
   printf_begin();             // needed only once for printing details
   if (!radio.begin()) {
@@ -131,71 +132,59 @@ void getData() {
   }
 }
 void controlRobot() {
-  if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)){
-    if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
-      if (payload[0]<50){
-        M1speed = (payload[0]-90)*7/5+30; 
-        M2speed = (payload[0]-75)*7/5+30; 
-        M1dir= 1; 
-        M2dir= 0;
+  if (payload[2] == 0){ // ButtonA is pressed, engage servo control
+    Svo1pos = (payload[0] + 100) * 180 / 200; // Convert X(-100 to 100) to int from 0-180
+    if (payload[0] >= 99) Svo1pos = 180; // fix for weird behaviour
+    Svo2pos = (payload[1] + 100) * 180 / 200; // Convert Y(-100 to 100) to int from 0-180
+    if (payload[1] >= 99) Svo2pos = 180; // fix for weird behaviour
+    Servo1.write(Svo1pos);
+    Servo2.write(Svo2pos);
+  }
+  else { // ButtonA isn't pressed, control motors instead
+    if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)){
+      if (payload[0]>50 || payload[0] < -50 ){ // if the robot needs to turn
+        if (payload[0]<50){
+          M1speed = (payload[0]-90)*7/5+30; 
+          M2speed = (payload[0]-75)*7/5+30; 
+          M1dir= 1; 
+          M2dir= 0;
+        }
+        else{
+          M1speed = (payload[0]*-1-90)*7/5+30; 
+          M2speed = (payload[0]*-1-90)*7/5+30; 
+          M1dir= 0; 
+          M2dir= 1;
+        }
+        
       }
-      else{
-        M1speed = (payload[0]*-1-90)*7/5+30; 
-        M2speed = (payload[0]*-1-90)*7/5+30; 
-        M1dir= 0; 
-        M2dir= 1;
+      if (payload[1]>50){
+          M1speed = (payload[1]-50)*7/5+30; 
+          M2speed = (payload[1]-50)*7/5+30; 
+          M1dir= 1; 
+          M2dir= 1;
       }
-      
+      if (payload[1]<-50){
+          M1speed = (payload[1]*-1-50)*7/5+30; 
+          M2speed = (payload[1]*-1-50)*7/5+30; 
+          M1dir= 0; 
+          M2dir= 0; 
+      }
+      if (payload[4]){
+        M1speed= 100; 
+        M2speed= 100;
+      }
+      Serial.println("M1Speed: ");
+      Serial.println("M2Speed: ");
+      digitalWrite(M1dirPin, M1dir);
+      digitalWrite(M2dirPin, M2dir);
+      analogWrite(M1pwmPin, M1speed*2.54);
+      analogWrite(M2pwmPin, M2speed*2.54);
     }
-    if (payload[1]>50){
-        M1speed = (payload[1]-50)*7/5+30; 
-        M2speed = (payload[1]-50)*7/5+30; 
-        M1dir= 1; 
-        M2dir= 1;
+    else { // set both motors to zero, if X&Y are within deadzone
+      analogWrite(M1pwmPin, 0);
+      analogWrite(M2pwmPin, 0);
     }
-    if (payload[1]<-50){
-        M1speed = (payload[1]*-1-50)*7/5+30; 
-        M2speed = (payload[1]*-1-50)*7/5+30; 
-        M1dir= 0; 
-        M2dir= 0; 
-    }
-    if (payload[4]){
-      M1speed= 100; 
-      M2speed= 100;
-    }
-    Serial.println("M1Speed: ");
-    Serial.println("M2Speed: ");
-    digitalWrite(M1dirPin, M1dir);
-    digitalWrite(M2dirPin, M2dir);
-    analogWrite(M1pwmPin, M1speed*2.54);
-    analogWrite(M2pwmPin, M2speed*2.54);
   }
-  else { // set both motors to zero, if X&Y are within deadzone
-    analogWrite(M1pwmPin, 0);
-    analogWrite(M2pwmPin, 0);
-  }
-
-
-  // These last lines show how to make hobby servo go to a position when button press is received
-  //---Servo Control---
-  if (payload[2]==0 && !Svo1On){ // buttonA pressed, and Servo1 is not extended
-    Servo1.write(180); // extend Servo1
-    Svo1On = true; // Servo1 is now extended
-  }
-  if (payload[2]==1 && Svo1On){ // buttonA not pressed, and Servo1 extended
-    Servo1.write(10); // unextend Servo1
-    Svo1On = false; // Servo1 is no longer extended
-  }
-  if (payload[3]==0 && !Svo2On){ // buttonB pressed, and Servo2 is not extended
-    Servo2.write(180); // extend Servo2
-    Svo2On = true; // Servo2 is now extended
-  }
-  if (payload[3]==1 && Svo2On){ // buttonB not pressed, and Servo2 extended
-    Servo2.write(10); // unextend Servo2
-    Svo2On = false; // Servo2 is no longer extended
-  }
-  if (payload[3]==0) digitalWrite(BUZZER, HIGH);  //turn on buzzer
-  else digitalWrite(BUZZER, LOW); // turn off buzzer
 }
 void sendAckData(){
   ackData[0] = M1speed; 
