@@ -54,7 +54,6 @@ bool lastTxSuccess;
 bool lastRxSuccess;
 int txPercent;
 int vScreen = 0;
-bool goodSignal;
 void setup() {
 
   Serial.begin(115200);
@@ -251,18 +250,12 @@ void loop() {
         // print status of communication
         u8g2.setCursor(80, 7);
         if (lastTxSuccess) {
-          if (goodSignal){
-            u8g2.print("Tx: OK");
-          }
-          else u8g2.print("Tx: low");
+          u8g2.print("Tx: OK");
         } 
         else u8g2.print("Tx: fail");
         u8g2.setCursor(80, 17);
         if (lastRxSuccess) {
-          if (ackData[7] == 1){
-            u8g2.print("Rx: OK");
-          }
-          u8g2.print("Rx: low");
+          u8g2.print("Rx: OK");
         } else u8g2.print("Rx: fail");
       }
       gfxTime = millis() - gfxTime;
