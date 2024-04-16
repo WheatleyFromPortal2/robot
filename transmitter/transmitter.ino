@@ -149,7 +149,7 @@ void loop() {
     u8g2.firstPage();
     do {
       gfxTime = millis();
-      txPercent = ((successfulTx / (successfulTx + failedTx))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
+      txPercent = (successfulTx / ((successfulTx + failedTx)) * 1.0) * 100.0;  // Calculate the successful Tx percentage, force floating point math
       if (vScreen == -1) { // Print "gfxTime too long" error message
         u8g2.setFont(u8g2_font_profont11_mf);
         u8g2.setCursor(0,8);
