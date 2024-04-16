@@ -2,7 +2,7 @@
 
 Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter and receiver use the same number so they are paired together.
 
-Note that the serial monitor should be set to 115200bps to monitor the serial.print() output. 
+Note that the serial monitor should be set to 115200baud to monitor the serial.print() output. 
 
 You need to install the libraries titled:
 - "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
@@ -262,6 +262,15 @@ void loop() {
         if (lastRxSuccess) {
           u8g2.print("Rx: OK");
         } else u8g2.print("Rx: fail");
+        u8g2.setCursor(80, 27);
+        u8g2.print("Tx S/F:");
+        u8g2.setCursor(80, 37);
+        u8g2.print(successfulTx);
+        u8g2.print("/");
+        u8g2.print(failedTx);
+        u8g2.setCursor(80, 47);
+        u8g2.print(txPercent);
+        u8g2.print("%");
       }
       gfxTime = millis() - gfxTime;
       //Serial.println("gfxTime: ");
