@@ -222,13 +222,13 @@ void loop() {
         u8g2.setCursor(1, 7);
         u8g2.print("M1");
         u8g2.setCursor(0, 40);
-        if (ackData[0] > 0) u8g2.print("/\\");
-        else if (ackData[0] < 0) u8g2.print("\\/");
+        if (ackData[0] < 0) u8g2.print("/\\");
+        else if (ackData[0] > 0) u8g2.print("\\/");
         u8g2.setCursor(19, 7);
         u8g2.print("M2");
         u8g2.setCursor(18, 40);
-        if (ackData[1] > 0) u8g2.print("/\\");
-        else if (ackData[1] < 0) u8g2.print("\\/");
+        if (ackData[1] > 0) u8g2.print("\\/");
+        else if (ackData[1] < 0) u8g2.print("/\\");
         // draws a dial for servo position
         u8g2.drawCircle(55, 26, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
         u8g2.drawDisc(55, 26, 2);
