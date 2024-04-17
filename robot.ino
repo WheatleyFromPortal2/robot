@@ -59,6 +59,7 @@ int const x1Pin = -1;   // Pin for leftmost distance sensor echo
 int const x2Pin = 8;    // Pin for middle distance sensor echo
 int const x3Pin = -1;   // Pin for rightmost distance sensor echo
 long unsigned int dstTime;
+bool dstEnabled = true;
 long pulseDuration;
 int boost = 1;
 int retry = 0;  // used for disabling motors if robot is disconnected for long enough
@@ -141,10 +142,10 @@ void getData() {
       }
       resetFunc();  //reset the arduino so maybe it will regain communication
     }
-    delay(50 - dstTime);
   }
 }
 void controlRobot() {
+  if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
   if (payload[2] == 0) {                       // ButtonA is pressed, engage servo control
     Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
     if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
@@ -217,22 +218,32 @@ void sendAckData() {
 }
 void distances() {  // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
   dstTime = millis();
-  //digitalWrite(trigger, HIGH); // trigger the HC-SR04s
-  //delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
-  //digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
-  //pulseDuration = pulseIn(x1Pin, HIGH); // find time of pulse for x1
-  //ackData[2] = pulseDuration * 0.0171; // find distance in cm for x1
-  digitalWrite(trigger, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigger, LOW);
-  pulseDuration = pulseIn(x2Pin, HIGH);  // find time of pulse for x2
-  ackData[3] = pulseDuration * 0.0171;   // find distance in cm for x2
-  //digitalWrite(trigger, HIGH);
-  //delayMicroseconds(10);
-  //digitalWrite(trigger, LOW);
-  //pulseDuration = pulseIn(x3Pin, HIGH); // find time of pulse for x3
-  //ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
+  if (dstEnabled){
+    //digitalWrite(trigger, HIGH); // trigger the HC-SR04s
+    //delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
+    //digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
+    //pulseDuration = pulseIn(x1Pin, HIGH); // find time of pulse for x1
+    //ackData[2] = pulseDuration * 0.0171; // find distance in cm for x1
+    digitalWrite(trigger, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigger, LOW);
+    pulseDuration = pulseIn(x2Pin, HIGH);  // find time of pulse for x2
+    ackData[3] = pulseDuration * 0.0171;   // find distance in cm for x2
+    //digitalWrite(trigger, HIGH);
+    //delayMicroseconds(10);
+    //digitalWrite(trigger, LOW);
+    //pulseDuration = pulseIn(x3Pin, HIGH); // find time of pulse for x3
+    //ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
+  }
   dstTime = millis() - dstTime;
+  ackData[7] = dstTime;
+  if (dstTime > 50) {
+    dstEnabled = false; // if the time is greater than 50ms, disable distance sensors
+    Serial.print("DISTANCE SENSORS DISABLED");
+  }
+  else { // if the dstTime is normal, wait 50ms accounting for the time the distance sensor takes
+    delay(50 - dstTime);
+  }
   Serial.print("dstTime: ");
   Serial.println(dstTime);
 }
