@@ -7,14 +7,26 @@
 - Hamzah Salman
 - Hunter Dorrill
 # Hardware
-- 2 Arduino Unos (or compatable clones)
-- 2 nRF24L01
-- [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
-- [L298P Motor Shield](https://protosupplies.com/product/l298p-motor-driver-shield/)
-# Transmitter
-- Ardiuno Uno
-- [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
+## Robot
+### Electronics
+- Arduino Uno
 - nRF24L01
+- [L298P Motor Shield](https://protosupplies.com/product/l298p-motor-driver-shield/)
+- 2 `12v` DC Motors
+- DC-DC Buck Converter `12v`->`9v`
+- 2 **High-Power** Servos (not 9g, metal gears)
+### Structural
+- Lasercut Chassis
+- 3d Printed Wheels with Rubber bands
+- Transfer Bearing Caster
+## Transmitter
+- Ardiuno Uno
+- nRF24L01
+- [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
+- `9v` Battery
+- SSD1306 128x64 OLED Screen i2c
+### Structural
+- 3d Printed Transmitter Body
 ## Pin Assignments
 - Joystick X = `A0`
 - Joystick Y =`A1`
@@ -24,11 +36,6 @@
 - Button D = `5`
 - Button E = `6`
 - Button F = `7`
-# Robot
-- Ardiuno Uno
-- Motor Shield
-- 2 DC Motors
-- nRF24L01
 ## Pin Assignments
 - BUZZER = `4`
 - Servo1 = `A0`
@@ -56,7 +63,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 ## nRF24
 ![nRF24](nRF24.png)
 1. nRF24 `pin1` -> Arduino `Gnd`
-2. nRF24 `pin2` -> Arduino `+3.3v`.  Note, if you hook it up to +5v it will probably break.
+2. nRF24 `pin2` -> Arduino **`+3.3v`.  If you hook it up to +5v it will probably break.**
 3. nRF24 `pin3` -> Arduino `IOpin9`
 4. nRF24 `pin4` -> Arduino `IOpin10`
 5. nRF24 `pin5` -> Arduino `IOpin13`
