@@ -25,7 +25,9 @@ int ButtonC = 4;
 int ButtonD = 5;
 int ButtonE = 6;
 int ButtonF = 7;
-
+float const x1Scale = 0.25;
+float const x2Scale = 0.2;
+float const x3Scale = 0.25;
 // RF24 settings and IO pin assignments
 byte ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
 byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
@@ -187,8 +189,6 @@ void loop() {
         u8g2.setCursor(0, 38);
       } else if (vScreen == 1) {
         // this displays the proximity data
-        //u8g2.clearDisplay();
-        //Serial.println("PRINTING VSCREEN 1");
         u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
         u8g2.setFont(u8g2_font_profont11_mf);
         u8g2.setCursor(0, 7);
@@ -198,14 +198,14 @@ void loop() {
         u8g2.setCursor(116, 7);
         u8g2.print(ackData[4]);
         u8g2.drawDisc(63, 60, 2);
-        if (ackData[2] < 40) {
-          u8g2.drawTriangle(56 - (ackData[2] * 1.3), 63, 56 - (ackData[2] * 1.3), 51, 56 - (ackData[2] * 1.3) + 6, 57);
+        if (ackData[2] < 200) { // display triangle for x1
+          u8g2.drawTriangle(56 - (ackData[2] * x1Scale), 63, 56 - (ackData[2] * x1Scale), 51, 56 - (ackData[2] * x1Scale) + 6, 57);
         }
-        if (ackData[4] < 40) {
-          u8g2.drawTriangle(68 + (ackData[4] * 1.3), 63, 68 + (ackData[4] * 1.3), 51, 68 + (ackData[4] * 1.3) - 6, 57);
+        if (ackData[3] < 200) { // display triangel for x2
+          u8g2.drawTriangle(63, 60 - (ackData[3] * x2Scale), 57, 54 - (ackData[3] * x2Scale), 69, 54 - (ackData[3] * x2Scale));
         }
-        if (ackData[3] < 40) {
-          u8g2.drawTriangle(63, 60 - (ackData[3] * 1.15), 57, 54 - (ackData[3] * 1.15), 69, 54 - (ackData[3] * 1.15));
+        if (ackData[4] < 200) { // display triangle for x3
+          u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
         }
       } else if (vScreen == 2) {
         // this displays a bar graph (most likely motor speed)//*
