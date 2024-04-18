@@ -59,7 +59,7 @@ int const x1Pin = -1;   // Pin for leftmost distance sensor echo
 int const x2Pin = 8;    // Pin for middle distance sensor echo
 int const x3Pin = -1;   // Pin for rightmost distance sensor echo
 long unsigned int dstTime;
-bool dstEnabled = true;
+bool dstEnabled = false;
 long pulseDuration;
 int boost = 1;
 int retry = 0;  // used for disabling motors if robot is disconnected for long enough
@@ -209,10 +209,21 @@ void controlRobot() {
 void sendAckData() {
   if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
   if (M2dir == 0) M2speed = M2speed * -1;  // make M2speed negative if the direction is backwards
+  // sanitize ackData, because of floating point math errors
+  if (M1speed > 100) M1speed = 100;
+  if (M1speed < -100) M1speed = -100;
+  if (M2speed > 100) M2speed = 100;
+  if (M2speed < -100) M2speed = -100;
+  Svo1pos = Servo1.read();
+  Svo2pos = Servo2.read();
+  if (Svo1pos > 180) Svo1pos = 180;
+  if (Svo1pos < 0) Svo1pos = 0;
+  if (Svo2pos > 180) Svo2pos = 180;
+  if (Svo2pos < 0) Svo2pos = 0;
   ackData[0] = M1speed;
   ackData[1] = M2speed;
-  ackData[5] = Servo1.read();
-  ackData[6] = Servo2.read();
+  ackData[5] = Svo1pos;
+  ackData[6] = Svo2pos;
   Serial.println("Writing ackData");
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // load the payload for the next time
 }
