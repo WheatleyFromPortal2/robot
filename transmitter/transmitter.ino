@@ -52,7 +52,7 @@ long unsigned int TimeNext;
 long unsigned int successfulTx;
 long unsigned int failedTx;
 bool lastTxSuccess;
-bool lastRxSuccess;
+bool lastRx            Success;
 float txPercent;
 int vScreen = 0;
 void setup() {
@@ -87,7 +87,7 @@ void loop() {
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
-  //payload[6] = digitalRead(ButtonE);  // Removed, as ButtonE is used for controlling the vScreen
+  //payload[6] = digitalRead(ButtonE);  // emoved, as ButtonE is used for controlling the vScreen
   payload[7] = digitalRead(ButtonF);
   if (digitalRead(ButtonE) == 0) {
     vScreen += 1;
@@ -137,6 +137,7 @@ void loop() {
       Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
       failedTx++;                                             // Add one to value of failedTx, since the transmission failed
       lastTxSuccess = false;
+      lastRxSuccess = false;
       PrintToLCD();
     }
     prevMillis = millis();
