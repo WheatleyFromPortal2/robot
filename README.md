@@ -19,7 +19,21 @@
 - Lasercut Chassis
 - 3d Printed Wheels with Rubber bands
 - Transfer Bearing Caster
+### Pin Assignments
+- BUZZER = `4`
+- Servo1 = `A0`
+- Servo2 = `A1`
+- x1(Leftmost Dst Sensor) = `TBD`
+- x2(Middle Dst Sensor) = `8`
+- x3(Rightmost Dst Sensor) = `TBD`
+- Trigger(for activating dst sensors) = `7`
+#### Motor Shield
+- ENA = `5`
+- INA = `3`
+- ENB = `6`
+- INB = `2`
 ## Transmitter
+### Electronics
 - Ardiuno Uno
 - nRF24L01
 - [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
@@ -27,7 +41,7 @@
 - SSD1306 128x64 OLED Screen i2c
 ### Structural
 - 3d Printed Transmitter Body
-## Pin Assignments
+### Pin Assignments
 - Joystick X = `A0`
 - Joystick Y =`A1`
 - Button A = `2`
@@ -35,21 +49,6 @@
 - Button C = `4`
 - Button D = `5`
 - Button E = `6`
-- Button F = `7`
-## Pin Assignments
-- BUZZER = `4`
-- Servo1 = `A0`
-- Servo2 = `A1`
-### Distance Sensors
-- x1(Leftmost Dst Sensor) = `TBD`
-- x2(Middle Dst Sensor) = `8`
-- x3(Rightmost Dst Sensor) = `TBD`
-- Trigger(for activating dst sensors) = `7`
-### Motor Shield Pins
-- ENA = `5`
-- INA = `3`
-- ENB = `6`
-- INB = `2`
 ## Motor Shield Docs
 The shield is built to directly interface pins `10, 11, 12, 13` to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
 
