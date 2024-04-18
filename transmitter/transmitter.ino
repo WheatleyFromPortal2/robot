@@ -35,7 +35,6 @@ byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choo
 int RF_CE = 9;
 int RF_CSN = 10;
 
-String buf = String(ChannelFrequency);
 // Variables for recieving data from Robot, using ackData
 
 bool newData = false;
@@ -66,10 +65,6 @@ void setup() {
   Serial.print(F("RFpipe="));
   Serial.println(RFpipe);
   u8g2.begin();  // Enables U8g2 display
-  u8g2.print(F("Freq:"));
-  u8g2.print(ChannelFrequency);
-  u8g2.println(F("RFpipe: "));
-  u8g2.print(RFpipe);
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding.  Please reset."));
     for (;;)
@@ -92,7 +87,7 @@ void loop() {
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
-  payload[6] = digitalRead(ButtonE);  // should be removed, as ButtonE is used for controlling the vScreen
+  //payload[6] = digitalRead(ButtonE);  // Removed, as ButtonE is used for controlling the vScreen
   payload[7] = digitalRead(ButtonF);
   if (digitalRead(ButtonE) == 0) {
     vScreen += 1;
