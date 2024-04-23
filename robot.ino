@@ -18,9 +18,9 @@ v2.3 fixed studdering bug caused by communications restting routine
 byte ChannelFrequency = 24;  //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
 byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 
-int RF_CE = 9;
-int RF_CSN = 10;
-
+int const RF_CE = 9;
+int const RF_CSN = 10;
+int const gfxInterval = 50;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
@@ -248,12 +248,12 @@ void distances() {  // Calculate distances from distance sensors and put into ac
   }
   dstTime = millis() - dstTime;
   ackData[7] = dstTime;
-  if (dstTime > 50) {
-    dstEnabled = false; // if the time is greater than 50ms, disable distance sensors
+  if (dstTime > gfxInterval) {
+    dstEnabled = false; // if the time is greater than gfxInterval ms, disable distance sensors
     Serial.print("DISTANCE SENSORS DISABLED");
   }
-  else { // if the dstTime is normal, wait 50ms accounting for the time the distance sensor takes
-    delay(50 - dstTime);
+  else { // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
+    delay(gfxInterval - dstTime);
   }
   Serial.print("dstTime: ");
   Serial.println(dstTime);
