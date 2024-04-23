@@ -20,7 +20,7 @@ byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive 
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
-int const gfxInterval = 50;
+int const gfxInterval = 25;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };

@@ -34,7 +34,7 @@ byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choo
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
-int const gfxInterval = 50;
+int const gfxInterval = 25;
 // Variables for recieving data from Robot, using ackData
 
 bool newData = false;
@@ -54,7 +54,7 @@ long unsigned int failedTx;
 bool lastTxSuccess;
 bool lastRxSuccess;
 float txPercent;
-int vScreen = 0;
+int vScreen = 2;
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
