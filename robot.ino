@@ -155,7 +155,7 @@ void controlRobot() {
     Servo2.write(Svo2pos);
   } else {  // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {
-      S = payload[0];
+      S = payload[0] * 0.75; // make turning speed only 3/4 of full, to make it more easy to control
       T = payload[1];
       maximum = max(abs(T), abs(S));
       total = T + S;
