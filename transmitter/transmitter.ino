@@ -87,9 +87,10 @@ void loop() {
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
-  //payload[6] = digitalRead(ButtonE);  // emoved, as ButtonE is used for controlling the vScreen
+  //payload[6] = digitalRead(ButtonE);  // removed, as ButtonE is used for controlling the vScreen
   payload[7] = digitalRead(ButtonF);
   if (digitalRead(ButtonE) == 0) {
+    if (vScreen == -1) {vScreen = 2;} // if there is a graphics reset, go back to vScreen 2; instead of 0, because it has too high of a gfxTime(maybe print to multiple lines)
     vScreen += 1;
     if (vScreen > 2) { vScreen = 0; }
   }
