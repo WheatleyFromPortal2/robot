@@ -1,11 +1,6 @@
 # This is for the 2024 Eng8 Robot
 # [Robot Code](robot.ino)
 # [Transmitter Code](transmitter/transmitter.ino)
-# Members
-- Will Behnke
-- William Braskamp
-- Hamzah Salman
-- Hunter Dorrill
 # Hardware
 ## Robot
 ### Electronics
