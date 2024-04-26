@@ -21,6 +21,11 @@ byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive 
 int const RF_CE = 9;
 int const RF_CSN = 10;
 int const gfxInterval = 25;
+// Svo2 needs to be reversed
+int const Svo1Start = 0;
+int const Svo1End = 90;
+int const Svo2Start = 90; // purposely reversed, as Servo2 is mounted going the opposite direction
+int const Svo2End = 0;    // purposely reversed ^
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
@@ -108,13 +113,13 @@ void loop() {
   getData();
   controlRobot();
   sendAckData();
-  distances();
+  //distances(); decided to remove dst sensor, as the scoop will get in the way
 }
 void getData() {
   uint8_t pipe;
   if (radio.available(&pipe)) {              // is there a payload? get the pipe number that recieved it
     uint8_t bytes = radio.getPayloadSize();  // get the size of the payload
-    radio.read(&payload, bytes);             // fetch payload from FIFO
+    radio.read(&payload, bytes);             // fetch payload from FIFO(File In File Out)
     Serial.print(F("Received "));
     Serial.print(bytes);  // print the size of the payload
     Serial.print(F(" bytes on pipe "));
@@ -134,25 +139,32 @@ void getData() {
       for (int x = 2; x < 8; x++) {
         payload[x] = 1;
       }
-      for (int x = 0; x < 3; x++) {  //beep 3 times quickly so user knows communication was lost
+      for (int x = 0; x < 3; x++) {  // beep 3 times quickly so user knows communication was lost
         digitalWrite(BUZZER, HIGH);
         delay(100);
         digitalWrite(BUZZER, LOW);
         delay(100);
       }
-      resetFunc();  //reset the arduino so maybe it will regain communication
+      resetFunc();  // reset the arduino so maybe it will regain communication
     }
   }
 }
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
-  if (payload[2] == 0) {                       // ButtonA is pressed, engage servo control
-    Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
-    if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
-    Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
-    if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour
-    Servo1.write(Svo1pos);
-    Servo2.write(Svo2pos);
+  if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
+    if (payload[5] == 0) {
+      // ---Old Servo control method---
+      Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
+      if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
+      Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
+      if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour // ButtonA is pressed, engage servo control
+    } else { // ---New Servo Control Method, for Scoop---
+      Svo1pos = map(payload[0], -100, 100, Svo1Start, Svo1End); // map the X(-100 to 100) to the Servo 1 Start and Servo1 End values
+      Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End); // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
+    }
+    Servo1.write(Svo1pos); // write value to Servo 1
+    Servo2.write(Svo2pos); // write value to Servo 2
+    
   } else {  // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {
       S = payload[0] * 0.75; // make turning speed only 3/4 of full, to make it more easy to control
