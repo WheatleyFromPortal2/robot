@@ -30,7 +30,7 @@ RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
 int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
-int ackData[8] = { 0, 0, -1, -1, -1, -1, -1, -1 };  // the two values to send back to the remote, just using random numbers to test; "404" is to show an error
+int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
 int BUZZER = 0; // disable buzzer
 // motor control io pin assignments

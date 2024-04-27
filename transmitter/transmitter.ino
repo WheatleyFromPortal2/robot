@@ -14,7 +14,7 @@ You need to install the libraries titled:
 #include <U8g2lib.h>
 #include <Wire.h>
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
-int ackData[8] = { 28, 67, 10, 20, 30, 20, 160, 1 };  // just example values, check README.md for more info on what they actually mean
+int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // just example values, check README.md for more info on what they actually mean
 
 // io pin assignments for joystick shield
 int AnalogX = A0;
