@@ -159,7 +159,7 @@ void controlRobot() {
       Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
       if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour // ButtonA is pressed, engage servo control
     } else { // ---New Servo Control Method, for Scoop--- activated if ButtonD is not pressed
-      Svo1pos = map(payload[0], -100, 100, Svo1Start, Svo1End); // map the X(-100 to 100) to the Servo 1 Start and Servo1 End values
+      Svo1pos = map(payload[1], -100, 100, Svo1Start, Svo1End); // map the Y(-100 to 100) to the Servo 1 Start and Servo1 End values
       Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End); // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
     }
     Servo1.write(Svo1pos); // write value to Servo 1
