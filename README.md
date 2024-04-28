@@ -84,12 +84,13 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 ## Uses an array with **8** elements, numbered 0-7
 0. Value of `Joystick X` from -100 to 100
 1. Value of `Joystick Y` from -100 to 100
+## Buttons are `int`s from `0-1` (0 is pressed down)
 2. Value of `Button A`
 3. Value of `Button B`
 4. Value of `Button C`
 5. Value of `Button D`
 6. Value of `Button E`
-7. Value of `Button F`
+7. Value of `llMode` (from `0-1`, `1` is engaged)
 # ackData Characteristics; Robot -> Transmitter
 ## Uses an array of **8** elements, numbered 0-7
 0. `motorA` Motor A power percent (0-100)
