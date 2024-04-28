@@ -34,7 +34,7 @@ byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choo
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
-int const gfxInterval = 25;
+int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 // Variables for recieving data from Robot, using ackData
 
 bool newData = false;
@@ -100,7 +100,7 @@ void loop() {
   if (newData == true) {  // Print ackData and reset newData
     for (int i = 0; i <= 7; i++) {
       Serial.print(ackData[i]);
-      Serial.print(",");
+      if (i != 7) Serial.print(",");
       newData = false;
     }
     PrintToLCD();

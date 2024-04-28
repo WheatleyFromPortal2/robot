@@ -20,7 +20,7 @@ byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive 
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
-int const gfxInterval = 25;
+int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 // Svo2 needs to be reversed
 int const Svo1Start = 0;
 int const Svo1End = 90;
@@ -114,6 +114,7 @@ void loop() {
   controlRobot();
   sendAckData();
   //distances(); decided to remove dst sensor, as the scoop will get in the way
+  delay(gfxInterval);
 }
 void getData() {
   uint8_t pipe;
@@ -129,7 +130,6 @@ void getData() {
       Serial.print(payload[x]);
       Serial.print(F(" "));
     }
-    Serial.println(payload[7]);
     retry = 0;
   } else {  // if communication is lost then set all values to default
     retry++;
@@ -152,13 +152,13 @@ void getData() {
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
-    if (payload[5] == 0) {
+    if (payload[5] == 0) { // if ButtonD is pressed, do old method
       // ---Old Servo control method---
       Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
       if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
       Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
       if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour // ButtonA is pressed, engage servo control
-    } else { // ---New Servo Control Method, for Scoop---
+    } else { // ---New Servo Control Method, for Scoop--- activated if ButtonD is not pressed
       Svo1pos = map(payload[0], -100, 100, Svo1Start, Svo1End); // map the X(-100 to 100) to the Servo 1 Start and Servo1 End values
       Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End); // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
     }
@@ -203,9 +203,9 @@ void controlRobot() {
       }
       else M2dir = 0;
       Serial.println("M1Speed: ");
-      Serial.println(M1speed);
+      Serial.print(M1speed);
       Serial.println("M2Speed: ");
-      Serial.println(M2speed);
+      Serial.print(M2speed);
       digitalWrite(M1dirPin, M1dir);
       digitalWrite(M2dirPin, M2dir);
       analogWrite(M1pwmPin, M1speed*2.54);
@@ -236,8 +236,14 @@ void sendAckData() {
   ackData[1] = M2speed;
   ackData[5] = Svo1pos;
   ackData[6] = Svo2pos;
-  Serial.println("Writing ackData");
+  Serial.println(F(""));
+  Serial.print(F("Writing ackData["));
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // load the payload for the next time
+  for (int i = 0; i <= 7; i++) { // print ackData to Serial
+      Serial.print(ackData[i]);
+      if (i != 7) Serial.print(F(",")); // if it is not the last index, print a comma
+  }
+  Serial.print(F("]"));
 }
 void distances() {  // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
   dstTime = millis();
@@ -265,7 +271,8 @@ void distances() {  // Calculate distances from distance sensors and put into ac
     Serial.print("DISTANCE SENSORS DISABLED");
   }
   else { // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
-    delay(gfxInterval - dstTime);
+    if (dstEnabled) delay(gfxInterval - dstTime);
+    else delay(gfxInterval - 5);
   }
   Serial.print("dstTime: ");
   Serial.println(dstTime);
