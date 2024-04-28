@@ -92,7 +92,7 @@ void loop() {
   if (digitalRead(ButtonE) == 0) {
     if (vScreen == -1) {vScreen = 1;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has too high of a gfxTime(maybe print to multiple lines)
     vScreen += 1;
-    if (vScreen > 2) { vScreen = 0; }
+    if (vScreen > 1) { vScreen = 0; }
   }
   if (currentMillis - prevMillis >= txIntervalMillis) {
     send();
