@@ -185,26 +185,6 @@ void loop() {
         u8g2.print(F("%"));
         u8g2.setCursor(0, 38);
       } else if (vScreen == 1) {
-        // this displays the proximity data
-        u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
-        u8g2.setFont(u8g2_font_profont11_mf);
-        u8g2.setCursor(0, 7);
-        u8g2.print(ackData[2]);
-        u8g2.setCursor(58, 7);
-        u8g2.print(ackData[3]);
-        u8g2.setCursor(116, 7);
-        u8g2.print(ackData[4]);
-        u8g2.drawDisc(63, 60, 2);
-        if (ackData[2] < 200) { // display triangle for x1
-          u8g2.drawTriangle(56 - (ackData[2] * x1Scale), 63, 56 - (ackData[2] * x1Scale), 51, 56 - (ackData[2] * x1Scale) + 6, 57);
-        }
-        if (ackData[3] < 200) { // display triangel for x2
-          u8g2.drawTriangle(63, 60 - (ackData[3] * x2Scale), 57, 54 - (ackData[3] * x2Scale), 69, 54 - (ackData[3] * x2Scale));
-        }
-        if (ackData[4] < 200) { // display triangle for x3
-          u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
-        }
-      } else if (vScreen == 2) {
         // this displays a bar graph (most likely motor speed)//*
         //u8g2.clearDisplay();
         int graphH1 = abs(ackData[0]) * .48;
@@ -268,6 +248,26 @@ void loop() {
         u8g2.setCursor(80, 47);
         u8g2.print(txPercent);
         u8g2.print(F("%"));
+      } else if (vScreen == 2) {
+        // this displays the proximity data
+        u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
+        u8g2.setFont(u8g2_font_profont11_mf);
+        u8g2.setCursor(0, 7);
+        u8g2.print(ackData[2]);
+        u8g2.setCursor(58, 7);
+        u8g2.print(ackData[3]);
+        u8g2.setCursor(116, 7);
+        u8g2.print(ackData[4]);
+        u8g2.drawDisc(63, 60, 2);
+        if (ackData[2] < 200) { // display triangle for x1
+          u8g2.drawTriangle(56 - (ackData[2] * x1Scale), 63, 56 - (ackData[2] * x1Scale), 51, 56 - (ackData[2] * x1Scale) + 6, 57);
+        }
+        if (ackData[3] < 200) { // display triangel for x2
+          u8g2.drawTriangle(63, 60 - (ackData[3] * x2Scale), 57, 54 - (ackData[3] * x2Scale), 69, 54 - (ackData[3] * x2Scale));
+        }
+        if (ackData[4] < 200) { // display triangle for x3
+          u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
+        }
       }
       gfxTime = millis() - gfxTime;
       //Serial.println("gfxTime: ");
