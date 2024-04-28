@@ -54,7 +54,7 @@ long unsigned int failedTx;
 bool lastTxSuccess;
 bool lastRxSuccess;
 float txPercent;
-int vScreen = 2;
+int vScreen = 1;
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
@@ -163,19 +163,22 @@ void loop() {
         u8g2.setFont(u8g2_font_profont11_mf);
         //u8g2.clearDisplay();
         u8g2.setCursor(0, 8);
-        u8g2.print(F("p"));  // Print payload
+        u8g2.print(F("payload["));  // Print payload
         for (int i = 0; i <= 7; i++) {
           u8g2.print(payload[i]);
-          u8g2.print(F(","));
+          if (i != 7) u8g2.print(F(",")); // print "," if it is not the last index
+          if (i == 3) u8g2.setCursor(0, 18); // once halfway through the payload, move the cursor down a line
         }
-        u8g2.print(F("}"));
-        u8g2.setCursor(0, 18);
-        u8g2.print(F("a"));  // Print ackData
+        u8g2.print(F("]"));
+        u8g2.setCursor(0, 28); // move to third line for ackData
+        u8g2.print(F("ackData["));  // Print ackData
         for (int i = 0; i <= 7; i++) {
           u8g2.print(ackData[i]);
-          u8g2.print(F(","));
+          if (i != 7) u8g2.print(F(",")); // print "," if it is not the last index
+          if (i == 3) u8g2.setCursor(0, 38); // once halfway through ackData, move the cursor down a line
         }
-        u8g2.setCursor(0, 28);
+        u8g2.print(F("]"));
+        u8g2.setCursor(0, 48); // move down a line
         u8g2.print(F("Tx S/F:"));  // Print Tx Success/Fail and percent
         u8g2.print(successfulTx);
         u8g2.print(F("/"));
@@ -183,7 +186,7 @@ void loop() {
         u8g2.print(F(" "));
         u8g2.print(txPercent);
         u8g2.print(F("%"));
-        u8g2.setCursor(0, 38);
+        //u8g2.setCursor(0, 38);
       } else if (vScreen == 1) {
         // this displays a bar graph (most likely motor speed)//*
         //u8g2.clearDisplay();
@@ -216,12 +219,12 @@ void loop() {
         int s2x = 17 * cos(radians(180 - ackData[6])) + 55;
         int s1y = 17 * -sin(radians(180 - ackData[5])) + 26;
         int s2y = 17 * -sin(radians(180 - ackData[6])) + 60;
-        ///*
+        
         int e1x = 5 * cos(radians(360 - ackData[5])) + 55;
         int e2x = 5 * cos(radians(360 - ackData[6])) + 55;
         int e1y = 5 * -sin(radians(360 - ackData[5])) + 26;
         int e2y = 5 * -sin(radians(360 - ackData[6])) + 60;
-        //*/
+        
         u8g2.drawLine(s1x, s1y, e1x, e1y);
         u8g2.drawLine(s2x, s2y, e2x, e2y);
 
@@ -234,11 +237,11 @@ void loop() {
         if (lastTxSuccess) {
           u8g2.print(F("Tx: OK"));
         } 
-        else u8g2.print(F("Tx: fail"));
+        else u8g2.print(F("Tx: FAIL"));
         u8g2.setCursor(80, 17);
         if (lastRxSuccess) {
           u8g2.print(F("Rx: OK"));
-        } else u8g2.print(F("Rx: fail"));
+        } else u8g2.print(F("Rx: FAIL"));
         u8g2.setCursor(80, 27);
         u8g2.print(F("Tx S/F:"));
         u8g2.setCursor(80, 37);
