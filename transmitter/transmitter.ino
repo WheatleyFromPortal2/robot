@@ -90,7 +90,7 @@ void loop() {
   //payload[6] = digitalRead(ButtonE);  // removed, as ButtonE is used for controlling the vScreen
   payload[7] = digitalRead(ButtonF);
   if (digitalRead(ButtonE) == 0) {
-    if (vScreen == -1) {vScreen = 2;} // if there is a graphics reset, go back to vScreen 2; instead of 0, because it has too high of a gfxTime(maybe print to multiple lines)
+    if (vScreen == -1) {vScreen = 1;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has too high of a gfxTime(maybe print to multiple lines)
     vScreen += 1;
     if (vScreen > 2) { vScreen = 0; }
   }
@@ -248,7 +248,9 @@ void loop() {
         u8g2.setCursor(80, 47);
         u8g2.print(txPercent);
         u8g2.print(F("%"));
-      } else if (vScreen == 2) {
+      } 
+      /* comment out proximity vScreen, it is no lonnger needed
+      else if (vScreen == 2) {
         // this displays the proximity data
         u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
         u8g2.setFont(u8g2_font_profont11_mf);
@@ -268,7 +270,7 @@ void loop() {
         if (ackData[4] < 200) { // display triangle for x3
           u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
         }
-      }
+      }*/
       gfxTime = millis() - gfxTime;
       //Serial.println("gfxTime: ");
       //Serial.print(gfxTime);
