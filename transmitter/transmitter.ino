@@ -19,7 +19,7 @@ int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // just example values, check READ
 // io pin assignments for joystick shield
 int const AnalogX = A0;
 int const AnalogY = A1;
-int const stickButton = 8; // button for joystick
+int const joyButton = 8; // button for joystick
 int const ButtonA = 2;
 int const ButtonB = 3;
 int const ButtonC = 4;
@@ -84,8 +84,14 @@ void setup() {
 
 void loop() {
   currentMillis = millis();
-  payload[0] = map(analogRead(AnalogX), 0, 1023, -100, 100); // uses map() function to map 0-1023 ADC value to -100 to 100 for joystick control
-  payload[1] = map(analogRead(AnalogY), 0, 1023, -100, 100); // uses map() function to map 0-1023 ADC value to -100 to 100 for joystick control
+  if (digitalRead(joyButton) == 0) { // if the joystick button is pressed
+    payload[0] = map(analogRead(AnalogX), 0, 1023, -50, 50); // use map() to map 0-1023 ADC Value to -50 to 50 for fine joystick control
+    payload[1] = map(analogRead(AnalogY), 0, 1023, -50, 50); // use map() to map 0-1023 ADC Value to -50 to 50 for fine joystick control
+  }
+  else { // normal operation
+    payload[0] = map(analogRead(AnalogX), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
+    payload[1] = map(analogRead(AnalogY), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
+  }
   //payload[0] = ((analogRead(AnalogX) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   //payload[1] = ((analogRead(AnalogY) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[2] = digitalRead(ButtonA);
