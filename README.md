@@ -84,7 +84,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 ## Uses an array with **8** elements, numbered 0-7
 0. Value of `Joystick X` from -100 to 100
 1. Value of `Joystick Y` from -100 to 100
-## Buttons are `int`s from `0-1` (0 is pressed down)
+### Buttons are `int`s from `0-1` (0 is pressed down)
 2. Value of `Button A`
 3. Value of `Button B`
 4. Value of `Button C`
