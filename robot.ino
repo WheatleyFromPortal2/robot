@@ -21,31 +21,31 @@ byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive 
 int const RF_CE = 9;
 int const RF_CSN = 10;
 int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
-// Svo2 needs to be reversed
 int const Svo1Start = 0;
 int const Svo1End = 90;
-int const Svo2Start = 90; // purposely reversed, as Servo2 is mounted going the opposite direction
-int const Svo2End = 0;    // purposely reversed ^
+int const Svo2Start = 0; 
+int const Svo2End = 90;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
 int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
-int BUZZER = 0; // disable buzzer
+int const BUZZER = 0; // disable buzzer
 // motor control io pin assignments
-int M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
-int M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is default
+int const M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
+int const M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is default
 
-int M2pwmPin = 6;  //IOpin assignment, enable for motor2 (pwm on this pin). IO pin11 is default, but changed to leave SPI port available
-int M2dirPin = 2;  //IOpin assignment, direction for motor2. IO pin13 is default
+int const M2pwmPin = 6;  //IOpin assignment, enable for motor2 (pwm on this pin). IO pin11 is default, but changed to leave SPI port available
+int const M2dirPin = 2;  //IOpin assignment, direction for motor2. IO pin13 is default
 
 int M1speed = 0;  // variable holding speed of motor, value of 0-100
 int M2speed = 0;  // variable holding speed of motor, value of 0-100
 
 bool M1dir = 1;
 bool M2dir = 1;
-
+bool doingLL = false; // controls Low Latency Mode
+int const llTime = 5; // set Low Latency Mode wait to 5ms
 float S;
 float T;
 float maximum;
@@ -106,7 +106,7 @@ void setup() {
   }
 }
 
-void (*resetFunc)(void) = 0;  //declare reset function at address 0
+void (*resetFunc)(void) = 0;  // declare reset function at address 0
 
 
 void loop() {
@@ -121,6 +121,8 @@ void getData() {
   if (radio.available(&pipe)) {              // is there a payload? get the pipe number that recieved it
     uint8_t bytes = radio.getPayloadSize();  // get the size of the payload
     radio.read(&payload, bytes);             // fetch payload from FIFO(File In File Out)
+    if (payload[7] == 1) {doingLL = true; ackData[7] = 1;} // if payload[7] is equal to 1, engage Low Latency Mode and update ackData to show Txer it has been recieved
+    else doingLL = false; ackData[7] = 0;// ^ if it isn't make doingLL false and update ackData as well
     Serial.print(F("Received "));
     Serial.print(bytes);  // print the size of the payload
     Serial.print(F(" bytes on pipe "));
@@ -136,7 +138,7 @@ void getData() {
     if (retry > 10) {
       payload[0] = 0;
       payload[1] = 0;
-      for (int x = 2; x < 8; x++) {
+      for (int x = 2; x < 8; x++) { // make all buttons set to not pressed
         payload[x] = 1;
       }
       for (int x = 0; x < 3; x++) {  // beep 3 times quickly so user knows communication was lost
@@ -163,7 +165,7 @@ void controlRobot() {
       Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End); // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
     }
     Servo1.write(Svo1pos); // write value to Servo 1
-    Servo2.write(Svo2pos); // write value to Servo 2
+    Servo2.write(map(Svo2pos, 0, 180, 180, 0)); // write value to Servo 2, using map() to reverse it
     
   } else {  // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {
@@ -227,7 +229,7 @@ void sendAckData() {
   if (M2speed > 100) M2speed = 100;
   if (M2speed < -100) M2speed = -100;
   Svo1pos = Servo1.read();
-  Svo2pos = Servo2.read();
+  Svo2pos = map(Servo2.read(), 0, 180, 180, 0); // using map() to reverse servo to align with writes, as it is mounted backwards
   if (Svo1pos > 180) Svo1pos = 180;
   if (Svo1pos < 0) Svo1pos = 0;
   if (Svo2pos > 180) Svo2pos = 180;
@@ -265,14 +267,17 @@ void distances() {  // Calculate distances from distance sensors and put into ac
     //ackData[4] = pulseDuration * 0.0171; // find distance in cm for x3
   }
   dstTime = millis() - dstTime;
-  ackData[7] = dstTime;
-  if (dstTime > gfxInterval) {
+  //ackData[7] = dstTime; // no longer needed, no more distance sensors
+  if (doingLL) delay(llTime); // if in Low Latency Mode, wait llTIme
+  else {
+    if (dstTime > gfxInterval) {
     dstEnabled = false; // if the time is greater than gfxInterval ms, disable distance sensors
     Serial.print("DISTANCE SENSORS DISABLED");
-  }
-  else { // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
-    if (dstEnabled) delay(gfxInterval - dstTime);
-    else delay(gfxInterval - 5);
+    }
+    else { // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
+      if (dstEnabled) delay(gfxInterval - dstTime);
+      else delay(gfxInterval - 5);
+    }
   }
   Serial.print("dstTime: ");
   Serial.println(dstTime);

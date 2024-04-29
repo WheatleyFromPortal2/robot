@@ -17,14 +17,15 @@ U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // just example values, check README.md for more info on what they actually mean
 
 // io pin assignments for joystick shield
-int AnalogX = A0;
-int AnalogY = A1;
-int ButtonA = 2;
-int ButtonB = 3;
-int ButtonC = 4;
-int ButtonD = 5;
-int ButtonE = 6;
-int ButtonF = 7;
+int const AnalogX = A0;
+int const AnalogY = A1;
+int const stickButton = 8; // button for joystick
+int const ButtonA = 2;
+int const ButtonB = 3;
+int const ButtonC = 4;
+int const ButtonD = 5;
+int const ButtonE = 6;
+int const ButtonF = 7;
 float const x1Scale = 0.25;
 float const x2Scale = 0.2;
 float const x3Scale = 0.25;
@@ -36,7 +37,9 @@ int const RF_CE = 9;
 int const RF_CSN = 10;
 int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 // Variables for recieving data from Robot, using ackData
-
+bool doingLL = false; // controls Low Latency Mode
+bool printedLL = false; // use this to find out if we have printed to screen for doingLL
+int const llTime = 5; // set llTime to 5ms
 bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
@@ -81,18 +84,25 @@ void setup() {
 
 void loop() {
   currentMillis = millis();
-  payload[0] = ((analogRead(AnalogX) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
-  payload[1] = ((analogRead(AnalogY) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
+  payload[0] = map(analogRead(AnalogX), 0, 1023, -100, 100); // uses map() function to map 0-1023 ADC value to -100 to 100 for joystick control
+  payload[1] = map(analogRead(AnalogY), 0, 1023, -100, 100); // uses map() function to map 0-1023 ADC value to -100 to 100 for joystick control
+  //payload[0] = ((analogRead(AnalogX) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
+  //payload[1] = ((analogRead(AnalogY) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[2] = digitalRead(ButtonA);
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
   //payload[6] = digitalRead(ButtonE);  // removed, as ButtonE is used for controlling the vScreen
-  payload[7] = digitalRead(ButtonF);
+  //payload[7] = digitalRead(ButtonF);  // removed, as ButtonF is used for controlling Low Latnecy Mode
   if (digitalRead(ButtonE) == 0) {
     if (vScreen == -1) {vScreen = 1;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has too high of a gfxTime(maybe print to multiple lines)
     vScreen += 1;
     if (vScreen > 1) { vScreen = 0; }
+  }
+  if (digitalRead(ButtonF) == 0) {
+    doingLL = !doingLL; // flip doingLL if ButtonF is pressed
+    if (doingLL) {payload[7] = 1; printedLL = false;} // make payload[7] = 1, if doingLL is true. make printedLL false to update on screen
+    else payload[7] = 0; vScreen = 1; // ^ or else make doingLL = 0 and set vScreen back to normal
   }
   if (currentMillis - prevMillis >= txIntervalMillis) {
     send();
@@ -103,14 +113,18 @@ void loop() {
       if (i != 7) Serial.print(",");
       newData = false;
     }
-    PrintToLCD();
-    Serial.println(F("GFXtime: "));
-    Serial.println(gfxTime);
-    if (gfxTime > gfxInterval) {
-      Serial.println(F("[ERROR] GFXtime too long!"));
-      vScreen = -1; // set error vScreen
-    } else {
-      delay(gfxInterval - gfxTime);  // slow transmissions down by gfxInterval ms, accounting for time it takes to render to the display
+    if (doingLL && printedLL) delay(llTime); // wait by llTIme if doingLL is true
+    else {
+      if (doingLL) vScreen = -2; // if doingLL, vScreen needs to be -2
+      PrintToLCD(); // if not in Low Latency print to OLED
+      Serial.println(F("GFXtime: "));
+      Serial.println(gfxTime);
+      if (gfxTime > gfxInterval) {
+        Serial.println(F("[ERROR] GFXtime too long!"));
+        vScreen = -1; // set error vScreen
+      } else {
+        delay(gfxInterval - gfxTime);  // slow transmissions down by gfxInterval ms, accounting for time it takes to render to the display
+      }
     }
   }
 }
@@ -149,6 +163,19 @@ void loop() {
     do {
       gfxTime = millis();
       txPercent = (float(successfulTx) / float(((successfulTx + failedTx)))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
+      if (vScreen == -2) { // print "Low Latency Mode engaged" message
+        u8g2.setFont(u8g2_font_profont11_mf);
+        u8g2.setCursor(0,8);
+        u8g2.print(F("Tx Low Latency On!"));
+        u8g2.setCursor(0,18); // move to next line
+        //if (ackData[7] == 1) u8g2.print(F("Robot Low Latency On! "));
+        //else u8g2.print(F("ERR: Robot not doingLL"));
+        //u8g2.setCursor(0,28); // move to next line
+        u8g2.print(F("llTime: "));
+        u8g2.print(llTime);
+        //vScreen = 1; // bring vScreen back to 1 once it returns to normal
+        printedLL = true; // ll has now been printed
+      }
       if (vScreen == -1) { // Print "gfxTime too long" error message
         u8g2.setFont(u8g2_font_profont11_mf);
         u8g2.setCursor(0,8);
@@ -251,7 +278,7 @@ void loop() {
         u8g2.setCursor(80, 47);
         u8g2.print(txPercent);
         u8g2.print(F("%"));
-      } 
+      }
       /* comment out proximity vScreen, it is no lonnger needed
       else if (vScreen == 2) {
         // this displays the proximity data
