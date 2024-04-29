@@ -1,7 +1,7 @@
 /*This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
 
 Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter and receiver use the same number so they are paired together.
-
+Note the gfxInterval variable, change this to adjust input delay !!!Numbers too low will cause constant errors!!!
 Note that the serial monitor should be set to 115200baud to monitor the serial.print() output. 
 
 You need to install the libraries titled:
@@ -14,9 +14,16 @@ You need to install the libraries titled:
 #include <U8g2lib.h>
 #include <Wire.h>
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
-int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // just example values, check README.md for more info on what they actually mean
 
-// io pin assignments for joystick shield
+// ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
+byte ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
+byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
+int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+int const llTime = 5; // time to wait during ll(Low Latency) mode
+// ---End matching vars---
+
+int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // initialize array with default values
+// IO pin assignments for joystick shield
 int const AnalogX = A0;
 int const AnalogY = A1;
 int const joyButton = 8; // button for joystick
@@ -26,20 +33,18 @@ int const ButtonC = 4;
 int const ButtonD = 5;
 int const ButtonE = 6;
 int const ButtonF = 7;
-float const x1Scale = 0.25;
-float const x2Scale = 0.2;
-float const x3Scale = 0.25;
+float const x1Scale = 0.25; // scaling vars for distance sensor rendering
+float const x2Scale = 0.2; // ^
+float const x3Scale = 0.25;// |
 // RF24 settings and IO pin assignments
-byte ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
-byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
-int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+
 // Variables for recieving data from Robot, using ackData
 bool doingLL = false; // controls Low Latency Mode
 bool printedLL = false; // use this to find out if we have printed to screen for doingLL
-int const llTime = 5; // set llTime to 5ms
+
 bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
@@ -57,7 +62,7 @@ long unsigned int failedTx;
 bool lastTxSuccess;
 bool lastRxSuccess;
 float txPercent;
-int vScreen = 1;
+int vScreen = 1; // don't recommend to change, 1 is the best vScreen
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
@@ -167,7 +172,7 @@ void loop() {
   void PrintToLCD() {
     u8g2.firstPage();
     do {
-      gfxTime = millis();
+      if (vScreen != -1) gfxTime = millis(); // if it is not the "gfxTime too long!" error, find the gfxTime
       txPercent = (float(successfulTx) / float(((successfulTx + failedTx)))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
       if (vScreen == -2) { // print "Low Latency Mode engaged" message
         u8g2.setFont(u8g2_font_profont11_mf);
@@ -307,7 +312,7 @@ void loop() {
           u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
         }
       }*/
-      gfxTime = millis() - gfxTime;
+      if (vScreen != -1) gfxTime = millis() - gfxTime; // if it is not the "gfxTime too long!" error, find the gfxTime
       //Serial.println("gfxTime: ");
       //Serial.print(gfxTime);
     } while (u8g2.nextPage());

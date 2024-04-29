@@ -1,7 +1,9 @@
 /* 
 This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
+
 Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter and receiver use the same number so they are paired together.
 Note that the serial monitor should be set to 115200bps to monitor the serial.print() output. 
+
 You need to install the library titled "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
 The RF24 related code is based off reference code found here: https://github.com/nRF24/RF24/blob/master/examples/GettingStarted/GettingStarted.ino
 
@@ -14,13 +16,15 @@ v2.3 fixed studdering bug caused by communications restting routine
 #include <RF24.h>
 #include <Servo.h>
 
-// ---RF24 settings and IO pin assignments---
-byte ChannelFrequency = 24;  //!!!!!!!!!!!!!!  Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
-byte RFpipe = 0;             //!!!!!!!!!!!!!!  This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
+// ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
+byte ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
+byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
+int const gfxInterval = 25;  // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+int const llTime = 5; // set Low Latency Mode wait to 5ms
+// ---End matching vars---
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
-int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 int const Svo1Start = 0;
 int const Svo1End = 90;
 int const Svo2Start = 0; 
@@ -45,7 +49,7 @@ int M2speed = 0;  // variable holding speed of motor, value of 0-100
 bool M1dir = 1;
 bool M2dir = 1;
 bool doingLL = false; // controls Low Latency Mode
-int const llTime = 5; // set Low Latency Mode wait to 5ms
+
 float S;
 float T;
 float maximum;
