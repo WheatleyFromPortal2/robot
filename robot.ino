@@ -17,8 +17,8 @@ v2.3 fixed studdering bug caused by communications restting routine
 #include <Servo.h>
 
 // ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
-byte ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
-byte RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
+byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
+byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 int const gfxInterval = 25;  // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 int const llTime = 5; // set Low Latency Mode wait to 5ms
 // ---End matching vars---
@@ -35,7 +35,8 @@ uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", 
 int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
-int const BUZZER = 0; // disable buzzer
+int const BUZZER = 4; // Active Buzzer on Pin4, does not require tone() command
+bool buzzerEnabled = true; // Set to false if you think it's too loud
 // motor control io pin assignments
 int const M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
 int const M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is default
@@ -70,11 +71,10 @@ int const x3Pin = -1;   // Pin for rightmost distance sensor echo
 long unsigned int dstTime;
 bool dstEnabled = false;
 long pulseDuration;
-int boost = 1;
 int retry = 0;  // used for disabling motors if robot is disconnected for long enough
 int Svo1pos = 0;
 int Svo2pos = 0;
-int deadzone = 10;  // set deadzone to 10
+int const deadzone = 5;  // set deadzone to 10
 //some boards need to wait to ensure access to serial over USB
 
 void setup() {
@@ -146,10 +146,12 @@ void getData() {
         payload[x] = 1;
       }
       for (int x = 0; x < 3; x++) {  // beep 3 times quickly so user knows communication was lost
-        digitalWrite(BUZZER, HIGH);
-        delay(100);
-        digitalWrite(BUZZER, LOW);
-        delay(100);
+        if (buzzerEnabled) {
+          digitalWrite(BUZZER, HIGH);
+          delay(100);
+          digitalWrite(BUZZER, LOW);
+          delay(100);
+        }
       }
       resetFunc();  // reset the arduino so maybe it will regain communication
     }
@@ -157,6 +159,8 @@ void getData() {
 }
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
+  if (payload[3] == 0 && buzzerEnabled) digitalWrite(BUZZER, HIGH); // if ButtonB pressed and buzzer enabled, turn on horn
+  else digitalWrite(BUZZER, LOW);
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
     M2speed = 0; // make motor speed zero when controlling servos
