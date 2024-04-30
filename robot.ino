@@ -158,6 +158,8 @@ void getData() {
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
+    M1speed = 0; // make motor speed zero when controlling servos
+    M2speed = 0; // make motor speed zero when controlling servos
     if (payload[5] == 0) { // if ButtonD is pressed, do old method
       // ---Old Servo control method---
       Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
