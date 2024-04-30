@@ -105,8 +105,8 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 # ackData Characteristics; Robot -> Transmitter
 ## Uses an array of **8** elements, numbered 0-7
 0. `motorA` Motor A power percent (`0-100`)
-1. `motorB` Motor B power percent (`0-100`)
-<del>2. `x1` Distance value for leftmost distance sensor (centimeters)
+1. `motorB` Motor B power percent (`0-100`)<del>
+2. `x1` Distance value for leftmost distance sensor (centimeters)
 3. `x2` Distance value for middle distance sensor (centimeters)
 4. `x3` Distance value for rightmost distance sensor (centimeters)</del>
 5. `servo1` Rotation of leftmost servo (degrees)
