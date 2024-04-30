@@ -19,6 +19,7 @@ U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
 byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 int const gfxInterval = 30; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+unsigned long txIntervalMillis = 20; // time between transmissions
 int const llTime = 5; // time to wait during ll(Low Latency) mode
 // ---End matching vars---
 
@@ -48,7 +49,6 @@ bool printedLL = false; // use this to find out if we have printed to screen for
 bool newData = false;
 unsigned long currentMillis;
 unsigned long prevMillis;
-unsigned long txIntervalMillis = 20;  // send once per second
 unsigned long gfxTime;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
@@ -87,29 +87,7 @@ void setup() {
 
 void loop() {
   currentMillis = millis();
-  if (digitalRead(joyButton) == 0) { // if the joystick button is pressed
-    payload[0] = map(analogRead(AnalogX), 0, 1023, -50, 50); // use map() to map 0-1023 ADC Value to -50 to 50 for fine joystick control
-    payload[1] = map(analogRead(AnalogY), 0, 1023, -50, 50); // use map() to map 0-1023 ADC Value to -50 to 50 for fine joystick control
-  }
-  else { // normal operation
-    payload[0] = map(analogRead(AnalogX), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
-    payload[1] = map(analogRead(AnalogY), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
-  }
-  payload[2] = digitalRead(ButtonA);
-  payload[3] = digitalRead(ButtonB);
-  payload[4] = digitalRead(ButtonC);
-  payload[5] = digitalRead(ButtonD);
-  payload[6] = digitalRead(joyButton);
-  if (digitalRead(ButtonE) == 0) {
-    if (vScreen == -1) {vScreen = 0;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has a higher of a gfxTime, it is set to zero because of "vScreen += 1"
-    vScreen ++; // increment 1 to vScreen
-    if (vScreen > 1) { vScreen = 0; }
-  }
-  if (digitalRead(ButtonF) == 0) {
-    doingLL = !doingLL; // flip doingLL if ButtonF is pressed
-    if (doingLL) {payload[7] = 1; printedLL = false;} // make payload[7] = 1, if doingLL is true. make printedLL false to update on screen
-    else payload[7] = 0; vScreen = 1; // ^ or else make doingLL = 0 and set vScreen back to normal
-  }
+  readButtons();
   if (currentMillis - prevMillis >= txIntervalMillis) {
     send();
   }
@@ -135,6 +113,31 @@ void loop() {
   } // end of print ackData and reset newData
 } // end of void loop()
 
+void readButtons() {
+  if (digitalRead(joyButton) == 0) { // if the joystick button is pressed
+    payload[0] = map(analogRead(AnalogX), 0, 1023, -50, 50); // use map() to map 0-1023 ADC Value to -50 to 50 for fine joystick control
+    payload[1] = map(analogRead(AnalogY), 0, 1023, -50, 50); // use map() to map 0-1023 ADC Value to -50 to 50 for fine joystick control
+  }
+  else { // normal operation
+    payload[0] = map(analogRead(AnalogX), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
+    payload[1] = map(analogRead(AnalogY), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
+  }
+  payload[2] = digitalRead(ButtonA);
+  payload[3] = digitalRead(ButtonB);
+  payload[4] = digitalRead(ButtonC);
+  payload[5] = digitalRead(ButtonD);
+  payload[6] = digitalRead(joyButton);
+  if (digitalRead(ButtonE) == 0) { // if ButtonE is pressed down
+    if (vScreen == -1) {vScreen = 0;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has a higher of a gfxTime, it is set to zero because of "vScreen += 1"
+    vScreen ++; // increment 1 to vScreen
+    if (vScreen > 1) { vScreen = 0; }
+  }
+  if (digitalRead(ButtonF) == 0) { // if ButtonF is pressed down
+    doingLL = !doingLL; // flip doingLL if ButtonF is pressed
+    if (doingLL) {payload[7] = 1; printedLL = false;} // make payload[7] = 1, if doingLL is true. make printedLL false to update on screen
+    else payload[7] = 0; vScreen = 1; // ^ or else make doingLL = 0 and set vScreen back to normal
+  }
+} // end of void readButtons()
 void send() {
   bool report = radio.write(&payload, sizeof(payload));  // transmit the data and receive confirmation report
 
