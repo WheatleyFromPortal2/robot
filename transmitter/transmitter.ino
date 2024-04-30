@@ -68,24 +68,22 @@ void setup() {
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
   }
-  Serial.print(F("ChannelFrequency="));  // "F" is to force reading from flash, to reduce dynamic memory use
+  Serial.print(F("ChannelFrequency="));  // "F()" is to force reading from flash, to reduce dynamic memory use
   Serial.println(ChannelFrequency);
   Serial.print(F("RFpipe="));
   Serial.println(RFpipe);
   u8g2.begin();  // Enables U8g2 display
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding.  Please reset."));
-    for (;;)
-      ;  // hold in infinite loop
+    for (;;);  // hold in infinite loop
   }
-  radio.setDataRate(RF24_250KBPS);
-  radio.enableAckPayload();
+  radio.setDataRate(RF24_250KBPS); // set data rate. Can be RF24_250KBPS, RF24_1MBPS, RF24_2MBPS
+  radio.enableAckPayload(); // enable the AckPayload for ackData to work
   radio.setChannel(ChannelFrequency);      // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
-  radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default.
+  radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default. Can be RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
   radio.setPayloadSize(sizeof(payload));   // float datatype occupies 4 bytes
   radio.openWritingPipe(address[RFpipe]);  // set the transmit pipe to use
-  //radio.stopListening();                  // put radio in TX mode, maybe this will fix ackData?
-}  // setup
+}
 
 void loop() {
   currentMillis = millis();
@@ -97,17 +95,14 @@ void loop() {
     payload[0] = map(analogRead(AnalogX), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
     payload[1] = map(analogRead(AnalogY), 0, 1023, -100, 100); // uses map() to map 0-1023 ADC value to -100 to 100 for joystick control
   }
-  //payload[0] = ((analogRead(AnalogX) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
-  //payload[1] = ((analogRead(AnalogY) - 512) / 5.12);  // read the joystick and button inputs into the payload array.  The math turns the 0-1023 AD value of the analog input to a -100 to +100 number, with 0 (or close to that) being the center position of the joystick.
   payload[2] = digitalRead(ButtonA);
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
   payload[6] = digitalRead(joyButton);
-  //payload[7] = digitalRead(ButtonF);  // removed, as ButtonF is used for controlling Low Latency Mode
   if (digitalRead(ButtonE) == 0) {
-    if (vScreen == -1) {vScreen = 1;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has too high of a gfxTime(maybe print to multiple lines)
-    vScreen += 1;
+    if (vScreen == -1) {vScreen = 0;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has a higher of a gfxTime, it is set to zero because of "vScreen += 1"
+    vScreen ++; // increment 1 to vScreen
     if (vScreen > 1) { vScreen = 0; }
   }
   if (digitalRead(ButtonF) == 0) {
@@ -119,11 +114,11 @@ void loop() {
     send();
   }
   if (newData == true) {  // Print ackData and reset newData
-    for (int i = 0; i <= 7; i++) {
+    for (int i = 0; i <= 7; i++) { // for loop to print all of ackData to Serial
       Serial.print(ackData[i]);
-      if (i != 7) Serial.print(",");
-      newData = false;
+      if (i != 7) Serial.print(","); // if it is not the last index, print a comma
     }
+    newData = false; // reset newData
     if (doingLL && printedLL) delay(llTime); // wait by llTIme if doingLL is true
     else {
       if (doingLL) vScreen = -2; // if doingLL, vScreen needs to be -2
