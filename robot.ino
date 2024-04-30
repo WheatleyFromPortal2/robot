@@ -175,7 +175,8 @@ void controlRobot() {
     
   } else {  // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {
-      S = payload[0] * 0.75; // make turning speed only 3/4 of full, to make it more easy to control
+      if (payload[6] == 1) S = payload[0] * 0.75; // if joyButton not pressed make turning speed only 3/4 of full, to make it more easy to control
+      else S = payload[0]; // if it is pressed, don't adjust the turning speed
       T = payload[1];
       maximum = max(abs(T), abs(S));
       total = T + S;

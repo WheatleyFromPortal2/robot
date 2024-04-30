@@ -38,12 +38,23 @@
 - 3d Printed Transmitter Body
 ### Pin Assignments
 - Joystick X = `A0`
+    - Used for Motor and Scoop Control
 - Joystick Y =`A1`
+    - Used for Motor and Scoop Tilt Control
+- Joystick Button = `8`
+    - Hold to turn on fine control mode
 - Button A = `2`
+    - Hold to use Joystick is to control Scoop
 - Button B = `3`
+    - Not used currently
 - Button C = `4`
+    - Not used currently
 - Button D = `5`
+    - Hold with ButtonA to use old servo control method
 - Button E = `6`
+    - Used to switch vScreen
+- Button F = `7`
+    - Used to switch on/off Low Latency Mode
 ## Motor Shield Docs
 The shield is built to directly interface pins `10, 11, 12, 13` to the motor control ic for pwm control.  However, those exact pins are the hardware SPI interface for the wireless module **so we must use different motor control pins.**
 
@@ -57,7 +68,7 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 ## nRF24
 ![nRF24](nRF24.png)
 1. nRF24 `pin1` -> Arduino `Gnd`
-2. nRF24 `pin2` -> Arduino **`+3.3v`.  If you hook it up to +5v it will probably break.**
+2. nRF24 `pin2` -> Arduino **`+3.3v`.  If you hook it up to `+5v` it will probably break.**
 3. nRF24 `pin3` -> Arduino `IOpin9`
 4. nRF24 `pin4` -> Arduino `IOpin10`
 5. nRF24 `pin5` -> Arduino `IOpin13`
@@ -82,22 +93,22 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 - Note, the power entering here powers everything **as long as the OPT jumper is installed on the Motor Shield**.  That jumper interconnects the motor power to the Arduino power.
 # Payload Characteristics; Transmitter -> Robot
 ## Uses an array with **8** elements, numbered 0-7
-0. Value of `Joystick X` from -100 to 100
-1. Value of `Joystick Y` from -100 to 100
-### Buttons are `int`s from `0-1` (0 is pressed down)
+0. Value of `Joystick X` from `-100` to `100`
+1. Value of `Joystick Y` from `-100 to 100`
+### Buttons are ints from `0-1` (0 is pressed down)
 2. Value of `Button A`
 3. Value of `Button B`
 4. Value of `Button C`
 5. Value of `Button D`
-6. Value of `Button E`
+6. Value of `joyButton`
 7. Value of `llMode` (from `0-1`, `1` is engaged)
 # ackData Characteristics; Robot -> Transmitter
 ## Uses an array of **8** elements, numbered 0-7
-0. `motorA` Motor A power percent (0-100)
-1. `motorB` Motor B power percent (0-100)
-2. `x1` Distance value for leftmost distance sensor (centimeters)
+0. `motorA` Motor A power percent (`0-100`)
+1. `motorB` Motor B power percent (`0-100``)
+<del>2. `x1` Distance value for leftmost distance sensor (centimeters)
 3. `x2` Distance value for middle distance sensor (centimeters)
-4. `x3` Distance value for rightmost distance sensor (centimeters)
+4. `x3` Distance value for rightmost distance sensor (centimeters)</del>
 5. `servo1` Rotation of leftmost servo (degrees)
 6. `servo2` Rotation of rightmost servo (degrees)
-7. Not used, maybe battery?
+7. Whether doingLL is true `0-1`(`1` is engaged)

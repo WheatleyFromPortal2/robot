@@ -103,8 +103,8 @@ void loop() {
   payload[3] = digitalRead(ButtonB);
   payload[4] = digitalRead(ButtonC);
   payload[5] = digitalRead(ButtonD);
-  //payload[6] = digitalRead(ButtonE);  // removed, as ButtonE is used for controlling the vScreen
-  //payload[7] = digitalRead(ButtonF);  // removed, as ButtonF is used for controlling Low Latnecy Mode
+  payload[6] = digitalRead(joyButton);
+  //payload[7] = digitalRead(ButtonF);  // removed, as ButtonF is used for controlling Low Latency Mode
   if (digitalRead(ButtonE) == 0) {
     if (vScreen == -1) {vScreen = 1;} // if there is a graphics reset, go back to vScreen 1; instead of 0, because vScreen0 has too high of a gfxTime(maybe print to multiple lines)
     vScreen += 1;
