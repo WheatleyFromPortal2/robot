@@ -119,7 +119,7 @@ void loop() {
       if (i != 7) Serial.print(","); // if it is not the last index, print a comma
     }
     newData = false; // reset newData
-    if (doingLL && printedLL) delay(llTime); // wait by llTIme if doingLL is true
+    if (doingLL && printedLL) delay(llTime); // wait by llTime if doingLL is true
     else {
       if (doingLL) vScreen = -2; // if doingLL, vScreen needs to be -2
       PrintToLCD(); // if not in Low Latency print to OLED
@@ -130,185 +130,186 @@ void loop() {
         vScreen = -1; // set error vScreen
       } else {
         delay(gfxInterval - gfxTime);  // slow transmissions down by gfxInterval ms, accounting for time it takes to render to the display
-      }
-    }
-  }
-}
-  void send() {
-    bool report = radio.write(&payload, sizeof(payload));  // transmit the data and receive confirmation report
+      } 
+    } // end of function for not doingLL
+  } // end of print ackData and reset newData
+} // end of void loop()
 
-    for (int x = 0; x <= 7; x++) {  // print out all the data to serial monitor
-      Serial.print(payload[x]);
-      Serial.print(F(" "));
-    }
-    if (report) {
-      Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
-      successfulTx++;                                        // Add one to value of successfulTx, since the transmission succeeded
-      lastTxSuccess = true;
-      if (radio.isAckPayloadAvailable()) {
-        Serial.println(F("ackData is available!"));
-        radio.read(&ackData, sizeof(ackData));
-        newData = true;
-        lastRxSuccess = true;
-      } else {
-        Serial.println(F(" Acknowledge but no ackData "));
-        lastRxSuccess = false;
-      }
+void send() {
+  bool report = radio.write(&payload, sizeof(payload));  // transmit the data and receive confirmation report
+
+  for (int x = 0; x <= 7; x++) {  // print out all the data to serial monitor
+    Serial.print(payload[x]);
+    Serial.print(F(" "));
+  }
+  if (report) {
+    Serial.println(F("Transmission successful! Sent: "));  // payload was delivered
+    successfulTx++;                                        // Add one to value of successfulTx, since the transmission succeeded
+    lastTxSuccess = true;
+    if (radio.isAckPayloadAvailable()) {
+      Serial.println(F("ackData is available!"));
+      radio.read(&ackData, sizeof(ackData));
+      newData = true;
+      lastRxSuccess = true;
     } else {
-      Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
-      failedTx++;                                             // Add one to value of failedTx, since the transmission failed
-      lastTxSuccess = false;
+      Serial.println(F(" Acknowledge but no ackData "));
       lastRxSuccess = false;
-      PrintToLCD();
     }
-    prevMillis = millis();
+  } else {
+    Serial.println(F("Transmission failed or timed out"));  // payload was not delivered
+    failedTx++;                                             // Add one to value of failedTx, since the transmission failed
+    lastTxSuccess = false;
+    lastRxSuccess = false;
+    PrintToLCD();
   }
+  prevMillis = millis();
+}
 
-  void PrintToLCD() {
-    u8g2.firstPage();
-    do {
-      if (vScreen != -1) gfxTime = millis(); // if it is not the "gfxTime too long!" error, find the gfxTime
-      txPercent = (float(successfulTx) / float(((successfulTx + failedTx)))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
-      if (vScreen == -2) { // print "Low Latency Mode engaged" message
-        u8g2.setFont(u8g2_font_profont11_mf);
-        u8g2.setCursor(0,8);
-        u8g2.print(F("Tx Low Latency On!"));
-        u8g2.setCursor(0,18); // move to next line
-        //if (ackData[7] == 1) u8g2.print(F("Robot Low Latency On! "));
-        //else u8g2.print(F("ERR: Robot not doingLL"));
-        //u8g2.setCursor(0,28); // move to next line
-        u8g2.print(F("llTime: "));
-        u8g2.print(llTime);
-        //vScreen = 1; // bring vScreen back to 1 once it returns to normal
-        printedLL = true; // ll has now been printed
+void PrintToLCD() {
+  u8g2.firstPage();
+  do {
+    if (vScreen != -1) gfxTime = millis(); // if it is not the "gfxTime too long!" error, find the gfxTime
+    txPercent = (float(successfulTx) / float(((successfulTx + failedTx)))) * 100.0;  // Calculate the successful Tx percentage, force floating point math
+    if (vScreen == -2) { // print "Low Latency Mode engaged" message
+      u8g2.setFont(u8g2_font_profont11_mf);
+      u8g2.setCursor(0,8);
+      u8g2.print(F("Tx Low Latency On!"));
+      u8g2.setCursor(0,18); // move to next line
+      //if (ackData[7] == 1) u8g2.print(F("Robot Low Latency On! "));
+      //else u8g2.print(F("ERR: Robot not doingLL"));
+      //u8g2.setCursor(0,28); // move to next line
+      u8g2.print(F("llTime: "));
+      u8g2.print(llTime);
+      //vScreen = 1; // bring vScreen back to 1 once it returns to normal
+      printedLL = true; // ll has now been printed
+    }
+    if (vScreen == -1) { // Print "gfxTime too long" error message
+      u8g2.setFont(u8g2_font_profont11_mf);
+      u8g2.setCursor(0,8);
+      u8g2.print(F("gfxTime was too long!"));
+      u8g2.setCursor(0,18);
+      u8g2.print(F("gfxTime: "));
+      u8g2.print(gfxTime);
+      u8g2.setCursor(0,28);
+      u8g2.print(F("Press ButtonE to reset"));
+    }
+    if (vScreen == 0) {  // Raw Data vScreen
+      u8g2.setFont(u8g2_font_profont11_mf);
+      //u8g2.clearDisplay();
+      u8g2.setCursor(0, 8);
+      u8g2.print(F("payload["));  // Print payload
+      for (int i = 0; i <= 7; i++) {
+        u8g2.print(payload[i]);
+        if (i != 7) u8g2.print(F(",")); // print "," if it is not the last index
+        if (i == 3) u8g2.setCursor(0, 18); // once halfway through the payload, move the cursor down a line
       }
-      if (vScreen == -1) { // Print "gfxTime too long" error message
-        u8g2.setFont(u8g2_font_profont11_mf);
-        u8g2.setCursor(0,8);
-        u8g2.print(F("gfxTime was too long!"));
-        u8g2.setCursor(0,18);
-        u8g2.print(F("gfxTime: "));
-        u8g2.print(gfxTime);
-        u8g2.setCursor(0,28);
-        u8g2.print(F("Press ButtonE to reset"));
+      u8g2.print(F("]"));
+      u8g2.setCursor(0, 28); // move to third line for ackData
+      u8g2.print(F("ackData["));  // Print ackData
+      for (int i = 0; i <= 7; i++) {
+        u8g2.print(ackData[i]);
+        if (i != 7) u8g2.print(F(",")); // print "," if it is not the last index
+        if (i == 3) u8g2.setCursor(0, 38); // once halfway through ackData, move the cursor down a line
       }
-      if (vScreen == 0) {  // Raw Data vScreen
-        u8g2.setFont(u8g2_font_profont11_mf);
-        //u8g2.clearDisplay();
-        u8g2.setCursor(0, 8);
-        u8g2.print(F("payload["));  // Print payload
-        for (int i = 0; i <= 7; i++) {
-          u8g2.print(payload[i]);
-          if (i != 7) u8g2.print(F(",")); // print "," if it is not the last index
-          if (i == 3) u8g2.setCursor(0, 18); // once halfway through the payload, move the cursor down a line
-        }
-        u8g2.print(F("]"));
-        u8g2.setCursor(0, 28); // move to third line for ackData
-        u8g2.print(F("ackData["));  // Print ackData
-        for (int i = 0; i <= 7; i++) {
-          u8g2.print(ackData[i]);
-          if (i != 7) u8g2.print(F(",")); // print "," if it is not the last index
-          if (i == 3) u8g2.setCursor(0, 38); // once halfway through ackData, move the cursor down a line
-        }
-        u8g2.print(F("]"));
-        u8g2.setCursor(0, 48); // move down a line
-        u8g2.print(F("Tx S/F:"));  // Print Tx Success/Fail and percent
-        u8g2.print(successfulTx);
-        u8g2.print(F("/"));
-        u8g2.print(failedTx);
-        u8g2.print(F(" "));
-        u8g2.print(txPercent);
-        u8g2.print(F("%"));
-        //u8g2.setCursor(0, 38);
-      } else if (vScreen == 1) {
-        // this displays a bar graph (most likely motor speed)//*
-        //u8g2.clearDisplay();
-        int graphH1 = abs(ackData[0]) * .48;
-        int graphH2 = abs(ackData[1]) * .48;
-        u8g2.drawFrame(0, 12, 12, 52);
-        u8g2.drawBox(2, 62 - graphH1, 8, graphH1);
+      u8g2.print(F("]"));
+      u8g2.setCursor(0, 48); // move down a line
+      u8g2.print(F("Tx S/F:"));  // Print Tx Success/Fail and percent
+      u8g2.print(successfulTx);
+      u8g2.print(F("/"));
+      u8g2.print(failedTx);
+      u8g2.print(F(" "));
+      u8g2.print(txPercent);
+      u8g2.print(F("%"));
+      //u8g2.setCursor(0, 38);
+    } else if (vScreen == 1) {
+      // this displays a bar graph (most likely motor speed)//*
+      //u8g2.clearDisplay();
+      int graphH1 = abs(ackData[0]) * .48;
+      int graphH2 = abs(ackData[1]) * .48;
+      u8g2.drawFrame(0, 12, 12, 52);
+      u8g2.drawBox(2, 62 - graphH1, 8, graphH1);
 
-        u8g2.drawFrame(18, 12, 12, 52);
-        u8g2.drawBox(20, 62 - graphH2, 8, graphH2);
+      u8g2.drawFrame(18, 12, 12, 52);
+      u8g2.drawBox(20, 62 - graphH2, 8, graphH2);
 
-        u8g2.setFont(u8g2_font_profont11_mf);
-        u8g2.setCursor(1, 7);
-        u8g2.print(F("M1"));
-        u8g2.setCursor(0, 40);
-        if (ackData[0] < 0) u8g2.print(F("/\\"));
-        else if (ackData[0] > 0) u8g2.print(F("\\/"));
-        u8g2.setCursor(19, 7);
-        u8g2.print(F("M2"));
-        u8g2.setCursor(18, 40);
-        if (ackData[1] > 0) u8g2.print(F("\\/"));
-        else if (ackData[1] < 0) u8g2.print(F("/\\"));
-        // draws a dial for servo position
-        u8g2.drawCircle(55, 26, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
-        u8g2.drawDisc(55, 26, 2);
-        u8g2.drawCircle(55, 60, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
-        u8g2.drawDisc(55, 60, 2);
+      u8g2.setFont(u8g2_font_profont11_mf);
+      u8g2.setCursor(1, 7);
+      u8g2.print(F("M1"));
+      u8g2.setCursor(0, 40);
+      if (ackData[0] < 0) u8g2.print(F("/\\"));
+      else if (ackData[0] > 0) u8g2.print(F("\\/"));
+      u8g2.setCursor(19, 7);
+      u8g2.print(F("M2"));
+      u8g2.setCursor(18, 40);
+      if (ackData[1] > 0) u8g2.print(F("\\/"));
+      else if (ackData[1] < 0) u8g2.print(F("/\\"));
+      // draws a dial for servo position
+      u8g2.drawCircle(55, 26, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
+      u8g2.drawDisc(55, 26, 2);
+      u8g2.drawCircle(55, 60, 15, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
+      u8g2.drawDisc(55, 60, 2);
 
-        int s1x = 17 * cos(radians(180 - ackData[5])) + 55;
-        int s2x = 17 * cos(radians(180 - ackData[6])) + 55;
-        int s1y = 17 * -sin(radians(180 - ackData[5])) + 26;
-        int s2y = 17 * -sin(radians(180 - ackData[6])) + 60;
-        
-        int e1x = 5 * cos(radians(360 - ackData[5])) + 55;
-        int e2x = 5 * cos(radians(360 - ackData[6])) + 55;
-        int e1y = 5 * -sin(radians(360 - ackData[5])) + 26;
-        int e2y = 5 * -sin(radians(360 - ackData[6])) + 60;
-        
-        u8g2.drawLine(s1x, s1y, e1x, e1y);
-        u8g2.drawLine(s2x, s2y, e2x, e2y);
+      int s1x = 17 * cos(radians(180 - ackData[5])) + 55;
+      int s2x = 17 * cos(radians(180 - ackData[6])) + 55;
+      int s1y = 17 * -sin(radians(180 - ackData[5])) + 26;
+      int s2y = 17 * -sin(radians(180 - ackData[6])) + 60;
+      
+      int e1x = 5 * cos(radians(360 - ackData[5])) + 55;
+      int e2x = 5 * cos(radians(360 - ackData[6])) + 55;
+      int e1y = 5 * -sin(radians(360 - ackData[5])) + 26;
+      int e2y = 5 * -sin(radians(360 - ackData[6])) + 60;
+      
+      u8g2.drawLine(s1x, s1y, e1x, e1y);
+      u8g2.drawLine(s2x, s2y, e2x, e2y);
 
-        u8g2.setCursor(50, 7);
-        u8g2.print(F("S1"));
-        u8g2.setCursor(50, 42);
-        u8g2.print(F("S2"));
-        // print status of communication
-        u8g2.setCursor(80, 7);
-        if (lastTxSuccess) {
-          u8g2.print(F("Tx: OK"));
-        } 
-        else u8g2.print(F("Tx: FAIL"));
-        u8g2.setCursor(80, 17);
-        if (lastRxSuccess) {
-          u8g2.print(F("Rx: OK"));
-        } else u8g2.print(F("Rx: FAIL"));
-        u8g2.setCursor(80, 27);
-        u8g2.print(F("Tx S/F:"));
-        u8g2.setCursor(80, 37);
-        u8g2.print(successfulTx);
-        u8g2.print(F("/"));
-        u8g2.print(failedTx);
-        u8g2.setCursor(80, 47);
-        u8g2.print(txPercent);
-        u8g2.print(F("%"));
+      u8g2.setCursor(50, 7);
+      u8g2.print(F("S1"));
+      u8g2.setCursor(50, 42);
+      u8g2.print(F("S2"));
+      // print status of communication
+      u8g2.setCursor(80, 7);
+      if (lastTxSuccess) {
+        u8g2.print(F("Tx: OK"));
+      } 
+      else u8g2.print(F("Tx: FAIL"));
+      u8g2.setCursor(80, 17);
+      if (lastRxSuccess) {
+        u8g2.print(F("Rx: OK"));
+      } else u8g2.print(F("Rx: FAIL"));
+      u8g2.setCursor(80, 27);
+      u8g2.print(F("Tx S/F:"));
+      u8g2.setCursor(80, 37);
+      u8g2.print(successfulTx);
+      u8g2.print(F("/"));
+      u8g2.print(failedTx);
+      u8g2.setCursor(80, 47);
+      u8g2.print(txPercent);
+      u8g2.print(F("%"));
+    }
+    /* comment out proximity vScreen, it is no lonnger needed
+    else if (vScreen == 2) {
+      // this displays the proximity data
+      u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
+      u8g2.setFont(u8g2_font_profont11_mf);
+      u8g2.setCursor(0, 7);
+      u8g2.print(ackData[2]);
+      u8g2.setCursor(58, 7);
+      u8g2.print(ackData[3]);
+      u8g2.setCursor(116, 7);
+      u8g2.print(ackData[4]);
+      u8g2.drawDisc(63, 60, 2);
+      if (ackData[2] < 200) { // display triangle for x1
+        u8g2.drawTriangle(56 - (ackData[2] * x1Scale), 63, 56 - (ackData[2] * x1Scale), 51, 56 - (ackData[2] * x1Scale) + 6, 57);
       }
-      /* comment out proximity vScreen, it is no lonnger needed
-      else if (vScreen == 2) {
-        // this displays the proximity data
-        u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);
-        u8g2.setFont(u8g2_font_profont11_mf);
-        u8g2.setCursor(0, 7);
-        u8g2.print(ackData[2]);
-        u8g2.setCursor(58, 7);
-        u8g2.print(ackData[3]);
-        u8g2.setCursor(116, 7);
-        u8g2.print(ackData[4]);
-        u8g2.drawDisc(63, 60, 2);
-        if (ackData[2] < 200) { // display triangle for x1
-          u8g2.drawTriangle(56 - (ackData[2] * x1Scale), 63, 56 - (ackData[2] * x1Scale), 51, 56 - (ackData[2] * x1Scale) + 6, 57);
-        }
-        if (ackData[3] < 200) { // display triangel for x2
-          u8g2.drawTriangle(63, 60 - (ackData[3] * x2Scale), 57, 54 - (ackData[3] * x2Scale), 69, 54 - (ackData[3] * x2Scale));
-        }
-        if (ackData[4] < 200) { // display triangle for x3
-          u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
-        }
-      }*/
-      if (vScreen != -1) gfxTime = millis() - gfxTime; // if it is not the "gfxTime too long!" error, find the gfxTime
-      //Serial.println("gfxTime: ");
-      //Serial.print(gfxTime);
-    } while (u8g2.nextPage());
-  }
+      if (ackData[3] < 200) { // display triangel for x2
+        u8g2.drawTriangle(63, 60 - (ackData[3] * x2Scale), 57, 54 - (ackData[3] * x2Scale), 69, 54 - (ackData[3] * x2Scale));
+      }
+      if (ackData[4] < 200) { // display triangle for x3
+        u8g2.drawTriangle(68 + (ackData[4] * x3Scale), 63, 68 + (ackData[4] * x3Scale), 51, 68 + (ackData[4] * x3Scale) - 6, 57);
+      }
+    }*/
+    if (vScreen != -1) gfxTime = millis() - gfxTime; // if it is not the "gfxTime too long!" error, find the gfxTime
+    //Serial.println("gfxTime: ");
+    //Serial.print(gfxTime);
+  } while (u8g2.nextPage());
+} // end of PrintToLCD
