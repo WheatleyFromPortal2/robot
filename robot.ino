@@ -19,7 +19,7 @@ v2.3 fixed studdering bug caused by communications restting routine
 // ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
 byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
 byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
-int const gfxInterval = 25;  // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+int const gfxInterval = 30;  // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 int const llTime = 5; // set Low Latency Mode wait to 5ms
 // ---End matching vars---
 

@@ -18,7 +18,7 @@ U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 // ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
 byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
 byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
-int const gfxInterval = 25; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+int const gfxInterval = 30; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 int const llTime = 5; // time to wait during ll(Low Latency) mode
 // ---End matching vars---
 
