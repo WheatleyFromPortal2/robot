@@ -1,14 +1,11 @@
 /* 
-This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
+This code is for an Arduino Uno reciever with motor control board and nRF24 transceiver.
 
-Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter and receiver use the same number so they are paired together.
-Note that the serial monitor should be set to 115200bps to monitor the serial.print() output. 
+Note the "ChannelFrequency", "RFpipe", and "gfxInterval" variables.  Change this so your transmitter and receiver use the same number so they are paired together and waiting the same amount of time.
+Note the "gfxInterval" variable, change this to adjust input delay !!!Numbers too low will cause constant errors!!!
+Note that the serial monitor should be set to 115200baud to monitor the serial.print() output. 
 
 You need to install the library titled "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
-The RF24 related code is based off reference code found here: https://github.com/nRF24/RF24/blob/master/examples/GettingStarted/GettingStarted.ino
-
-v2.2 adds resetting if communications is lost
-v2.3 fixed studdering bug caused by communications restting routine
 */
 
 #include <SPI.h>
@@ -108,7 +105,7 @@ void setup() {
   for (int x = 2; x < 8; x++) {
     payload[x] = 1;
   }
-}
+} // end of void setup()
 
 void (*resetFunc)(void) = 0;  // declare reset function at address 0
 
@@ -155,12 +152,14 @@ void getData() {
       }
       resetFunc();  // reset the arduino so maybe it will regain communication
     }
-  }
-}
+  } // end of com lost
+} // end of void getData()
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
-  if (payload[3] == 0 && buzzerEnabled) digitalWrite(BUZZER, HIGH); // if ButtonB pressed and buzzer enabled, turn on horn
-  else digitalWrite(BUZZER, LOW);
+  if (buzzerEnabled) { // if the buzzer is enabled, check for horn button
+    if (payload[3] == 0) digitalWrite(BUZZER, HIGH); // if ButtonB pressed and buzzer enabled, turn on horn
+    else digitalWrite(BUZZER, LOW);
+  }
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
     M2speed = 0; // make motor speed zero when controlling servos
@@ -178,10 +177,11 @@ void controlRobot() {
     Servo2.write(map(Svo2pos, 0, 180, 180, 0)); // write value to Servo 2, using map() to reverse it
     
   } else {  // ButtonA isn't pressed, control motors instead
-    if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {
+    if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) { // if the joystick is outside of the deadzones, run the motor control
       if (payload[6] == 1) S = payload[0] * 0.75; // if joyButton not pressed make turning speed only 3/4 of full, to make it more easy to control
       else S = payload[0]; // if it is pressed, don't adjust the turning speed
-      T = payload[1];
+      T = payload[1]; // throttle = joystickY
+      //---Arcade Drive Math, adapted from <https://xiaoxiae.github.io/Robotics-Simplified-Website/drivetrain-control/arcade-drive/>---
       maximum = max(abs(T), abs(S));
       total = T + S;
       diff = T - S;
@@ -205,12 +205,12 @@ void controlRobot() {
           M2speed = diff;
         }
       }
-      if (M1speed < 0){
+      if (M1speed < 0){ // calculate direction based off of value of M1speed
         M1speed *= -1;
         M1dir = 1;
       }
       else M1dir = 0;
-      if (M2speed < 0){
+      if (M2speed < 0){ // calculate direction based off of value of M2speed
         M2speed *= -1;
         M2dir = 1;
       }
@@ -229,8 +229,8 @@ void controlRobot() {
       M1speed = 0;
       M2speed = 0;
     }
-  }
-}
+  } // end of controlling motors (not servos)
+} // end of void controlRobot()
 void sendAckData() {
   if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
   if (M2dir == 0) M2speed = M2speed * -1;  // make M2speed negative if the direction is backwards

@@ -1,12 +1,14 @@
-/*This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
+/*
+This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
 
-Note the ChannelFrequency and RFpipe variables.  Change this so your transmitter and receiver use the same number so they are paired together.
+Note the "ChannelFrequency", "RFpipe", and "gfxInterval" variables.  Change this so your transmitter and receiver use the same number so they are paired together and waiting the correct amount of time.
 Note the gfxInterval variable, change this to adjust input delay !!!Numbers too low will cause constant errors!!!
 Note that the serial monitor should be set to 115200baud to monitor the serial.print() output. 
 
 You need to install the libraries titled:
 - "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
-- "U8g2" from the library manager.  "U8g2" by "oliver"<olikraus@gmail.com> */
+- "U8g2" from the library manager.  "U8g2" by "oliver"<olikraus@gmail.com>
+*/
 
 #include <SPI.h>  // (SPI bus uses hardware IO pins 11, 12, 13)
 #include <printf.h>
@@ -19,12 +21,12 @@ U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 83 to be legal. Must match on both transceivers.
 byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 int const gfxInterval = 30; // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
-unsigned long txIntervalMillis = 20; // time between transmissions
 int const llTime = 5; // time to wait during ll(Low Latency) mode
 // ---End matching vars---
 
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // initialize array with default values
 // IO pin assignments for joystick shield
+unsigned long txIntervalMillis = 20; // time between transmissions
 int const AnalogX = A0;
 int const AnalogY = A1;
 int const joyButton = 8; // button for joystick
@@ -83,7 +85,7 @@ void setup() {
   radio.setPALevel(RF24_PA_MAX);           // RF24_PA_MAX is default. Can be RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
   radio.setPayloadSize(sizeof(payload));   // float datatype occupies 4 bytes
   radio.openWritingPipe(address[RFpipe]);  // set the transmit pipe to use
-}
+} // end of void setup()
 
 void loop() {
   currentMillis = millis();
@@ -166,7 +168,7 @@ void send() {
     PrintToLCD();
   }
   prevMillis = millis();
-}
+} // end of void send()
 
 void PrintToLCD() {
   u8g2.firstPage();
