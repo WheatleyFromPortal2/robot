@@ -2,8 +2,8 @@
 This code is for an Arduino Uno transmitter with joystick control board and nRF24 transceiver.
 
 Note the "ChannelFrequency", "RFpipe", and "gfxInterval" variables.  Change this so your transmitter and receiver use the same number so they are paired together and waiting the correct amount of time.
-Note the gfxInterval variable, change this to adjust input delay !!!Numbers too low will cause constant errors!!!
-Note that the serial monitor should be set to 115200baud to monitor the serial.print() output. 
+Note the "gfxInterval" variable, change this to adjust input delay !!!Numbers too low will cause constant errors!!!
+Note that the serial monitor should be set to 115200baud to monitor the Serial.print() output. 
 
 You need to install the libraries titled:
 - "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"

@@ -3,7 +3,7 @@ This code is for an Arduino Uno reciever with motor control board and nRF24 tran
 
 Note the "ChannelFrequency", "RFpipe", and "gfxInterval" variables.  Change this so your transmitter and receiver use the same number so they are paired together and waiting the same amount of time.
 Note the "gfxInterval" variable, change this to adjust input delay !!!Numbers too low will cause constant errors!!!
-Note that the serial monitor should be set to 115200baud to monitor the serial.print() output. 
+Note that the serial monitor should be set to 115200baud to monitor the Serial.print() output. 
 
 You need to install the library titled "RF24" from the library manager.  "RF24" by "TMRh20,Avamander"
 */
@@ -55,8 +55,8 @@ float total;
 float diff;
 
 // Hobby Servo io pin assignments
-int Svo1pin = A0;
-int Svo2pin = A1;
+int const Svo1pin = A0;
+int const Svo2pin = A1;
 Servo Servo1;  // create instance of servo
 Servo Servo2;  // create instance of servo
 
@@ -71,8 +71,7 @@ long pulseDuration;
 int retry = 0;  // used for disabling motors if robot is disconnected for long enough
 int Svo1pos = 0;
 int Svo2pos = 0;
-int const deadzone = 5;  // set deadzone to 10
-//some boards need to wait to ensure access to serial over USB
+int const deadzone = 5;  // set deadzone to 5
 
 void setup() {
   printf_begin();  // needed only once for printing details
@@ -88,35 +87,34 @@ void setup() {
   }
   Servo1.attach(Svo1pin);
   Servo2.attach(Svo2pin);
+// ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
-
   radio.enableAckPayload();  // enables sending data back to transmitter
-
   radio.setChannel(ChannelFrequency);                        // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);                             // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));                     // set the payload size, must be < 32bytes
   radio.openReadingPipe(RFpipe, address[RFpipe]);            // open the pipe for reading from the radio
   radio.startListening();                                    // put radio in RX mode
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
-  pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
 
+  pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
   payload[0] = 0;  // this code puts in default values for the payload
   payload[1] = 0;
-  for (int x = 2; x < 8; x++) {
+  for (int x = 2; x < 8; x++) { // set button values to 1(not pressed) using a for loop
     payload[x] = 1;
   }
 } // end of void setup()
 
 void (*resetFunc)(void) = 0;  // declare reset function at address 0
 
-
 void loop() {
   getData();
   controlRobot();
   sendAckData();
-  //distances(); decided to remove dst sensor, as the scoop will get in the way
+  //distances(); decided to remove dst sensors, as the scoop will get in the way
   delay(gfxInterval);
-}
+} // end of void loop()
+
 void getData() {
   uint8_t pipe;
   if (radio.available(&pipe)) {              // is there a payload? get the pipe number that recieved it
@@ -231,6 +229,7 @@ void controlRobot() {
     }
   } // end of controlling motors (not servos)
 } // end of void controlRobot()
+
 void sendAckData() {
   if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
   if (M2dir == 0) M2speed = M2speed * -1;  // make M2speed negative if the direction is backwards
@@ -258,6 +257,7 @@ void sendAckData() {
   }
   Serial.print(F("]"));
 }
+
 void distances() {  // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
   dstTime = millis();
   if (dstEnabled){
