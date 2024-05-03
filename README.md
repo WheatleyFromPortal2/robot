@@ -33,7 +33,7 @@
 - nRF24L01
 - [Fundiuno Shield](https://cb-electronics.com/products/funduino-joystick-shield-v1-a-ky-023-shield/)
 - `9v` Battery
-- SSD1306 128x64 OLED Screen i2c
+- SSD1306 128x64 OLED Screen i<sup>2</sup>c
 ### Structural
 - 3d Printed Transmitter Body
 ### Pin Assignments
