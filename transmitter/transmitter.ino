@@ -24,7 +24,10 @@ int const gfxInterval = 30; // interval to wait for graphics update, VERY SENSIT
 int const llTime = 5; // time to wait during ll(Low Latency) mode
 // ---End matching vars---
 
+int payload[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // initialize array with default values
+uint8_t const address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
+
 // IO pin assignments for joystick shield
 unsigned long txIntervalMillis = 20; // time between transmissions
 int const AnalogX = A0;
@@ -41,11 +44,10 @@ float const x2Scale = 0.2; // ^
 float const x3Scale = 0.25;// |
 // RF24 settings and IO pin assignments
 
-int const RF_CE = 9;
-int const RF_CSN = 10;
+int const RF_CE = 9; // pins for setting module between transmit/command/standby/active
+int const RF_CSN = 10; // ^
 
-// Variables for recieving data from Robot, using ackData
-bool doingLL = false; // controls Low Latency Mode
+bool doingLL = false; // controls whether Low Latency Mode is enabled
 bool printedLL = false; // use this to find out if we have printed to screen for doingLL
 
 bool newData = false;
@@ -54,9 +56,6 @@ unsigned long prevMillis;
 unsigned long gfxTime;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
-uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };  // 0 to 15
-int payload[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
 long unsigned int TimeNow;
 long unsigned int TimeNext;
 long unsigned int successfulTx;
@@ -64,7 +63,7 @@ long unsigned int failedTx;
 bool lastTxSuccess;
 bool lastRxSuccess;
 float txPercent;
-int vScreen = 1; // don't recommend to change, 1 is the best vScreen
+int vScreen = 1; // Variable controls what screen is printed to the display (can be 0 or 1 normally). I don't recommend to change it, 1 is the best vScreen
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
@@ -96,7 +95,7 @@ void loop() {
   if (newData == true) {  // Print ackData and reset newData
     for (int i = 0; i <= 7; i++) { // for loop to print all of ackData to Serial
       Serial.print(ackData[i]);
-      if (i != 7) Serial.print(","); // if it is not the last index, print a comma
+      if (i != 7) Serial.print(F(",")); // if it is not the last index, print a comma
     }
     newData = false; // reset newData
     if (doingLL && printedLL) delay(llTime); // wait by llTime if doingLL is true
@@ -314,7 +313,7 @@ void PrintToLCD() {
       }
     }*/
     if (vScreen != -1) gfxTime = millis() - gfxTime; // if it is not the "gfxTime too long!" error, find the gfxTime
-    //Serial.println("gfxTime: ");
-    //Serial.print(gfxTime);
+    Serial.println(F("gfxTime: "));
+    Serial.print(gfxTime);
   } while (u8g2.nextPage());
 } // end of PrintToLCD

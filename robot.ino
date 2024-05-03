@@ -28,7 +28,7 @@ int const Svo2Start = 0;
 int const Svo2End = 90;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
-uint8_t address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
+uint8_t const address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
 int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
@@ -73,6 +73,8 @@ int Svo1pos = 0;
 int Svo2pos = 0;
 int const deadzone = 5;  // set deadzone to 5
 
+void (*resetFunc)(void) = 0;  // declare reset function at address 0
+
 void setup() {
   printf_begin();  // needed only once for printing details
   pinMode(trigger, OUTPUT);
@@ -82,8 +84,8 @@ void setup() {
     // some boards need to wait to ensure access to serial over USB
   }
   if (!radio.begin()) {
-    Serial.println(F("radio hardware is not responding!!"));
-    while (1) {}  // hold in infinite loop
+    Serial.println(F("radio hardware is not responding!"));
+    resetFunc(); // reset the Arduino
   }
   Servo1.attach(Svo1pin);
   Servo2.attach(Svo2pin);
@@ -98,14 +100,14 @@ void setup() {
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
 
   pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
-  payload[0] = 0;  // this code puts in default values for the payload
-  payload[1] = 0;
+  payload[0] = 0;  // this code puts in default motor values for the payload, so it doesn't move erratically
+  payload[1] = 0;  // ^
   for (int x = 2; x < 8; x++) { // set button values to 1(not pressed) using a for loop
     payload[x] = 1;
   }
 } // end of void setup()
 
-void (*resetFunc)(void) = 0;  // declare reset function at address 0
+
 
 void loop() {
   getData();
@@ -283,13 +285,13 @@ void distances() {  // Calculate distances from distance sensors and put into ac
   else {
     if (dstTime > gfxInterval) {
     dstEnabled = false; // if the time is greater than gfxInterval ms, disable distance sensors
-    Serial.print("DISTANCE SENSORS DISABLED");
+    Serial.print(F("DISTANCE SENSORS DISABLED"));
     }
     else { // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
       if (dstEnabled) delay(gfxInterval - dstTime);
       else delay(gfxInterval - 5);
     }
   }
-  Serial.print("dstTime: ");
+  Serial.print(F("dstTime: "));
   Serial.println(dstTime);
 }
