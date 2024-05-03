@@ -107,14 +107,13 @@ void setup() {
   }
 } // end of void setup()
 
-
-
 void loop() {
   getData();
   controlRobot();
   sendAckData();
   //distances(); decided to remove dst sensors, as the scoop will get in the way
-  delay(gfxInterval);
+  if (doingLL) delay(llTime); // if using Low Latency mode, delay by llTIme
+  else delay(gfxInterval); // otherwise,delay by gfxInterval
 } // end of void loop()
 
 void getData() {
