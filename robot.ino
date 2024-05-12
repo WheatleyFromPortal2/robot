@@ -57,8 +57,12 @@ float diff;
 // Hobby Servo io pin assignments
 int const Svo1pin = A0;
 int const Svo2pin = A1;
+int const Svo3pin = 18; 
+int const Svo4pin = 19;
 Servo Servo1;  // create instance of servo
 Servo Servo2;  // create instance of servo
+Servo Servo3;
+Servo Servo4; 
 
 //---Distance Sensor Vars---
 int const trigger = 7;  // specify pin used to trigger distance sensors, connect this to all of them
@@ -90,7 +94,12 @@ void setup() {
   Servo1.attach(Svo1pin);
   Servo1.write(0); // set servo to zero location
   Servo2.attach(Svo2pin);
+<<<<<<< HEAD
   Servo2.write(180); // set servo to zero location (reversed)
+=======
+  Servo3.attach(Svo3pin);
+  Servo4.attach(Svo4pin);
+>>>>>>> 759e005d4cbbd127ceb3b3f7abfeb4fd33f2c2da
 // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();  // enables sending data back to transmitter
@@ -172,6 +181,13 @@ void controlRobot() {
     if (payload[3] == 0) digitalWrite(BUZZER, HIGH); // if ButtonB pressed and buzzer enabled, turn on horn
     else digitalWrite(BUZZER, LOW);
   }
+  if (payload[3]==0){
+     Servo3.write(0); // write value to Servo 3
+     Servo4.write(map(0, 0, 180, 180, 0));
+  }
+  if (payload[4]==0){
+    Servo3.write(90);
+    Servo4.write(map(90, 0, 180, 180, 0));
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
     M2speed = 0; // make motor speed zero when controlling servos
