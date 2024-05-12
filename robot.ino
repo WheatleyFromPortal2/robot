@@ -99,7 +99,7 @@ void setup() {
   Servo3.write(0);  // set servo to zero location
   Servo4.attach(Svo4pin);
   Servo4.write(180);  // set servo to zer location (reversed)
-                      // ---RF24 Initialization---
+  // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();                                  // enables sending data back to transmitter
   radio.setChannel(ChannelFrequency);                        // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
@@ -127,7 +127,6 @@ void setup() {
   delay(150);
   digitalWrite(BUZZER, LOW);
 }  // end of void setup()
-
 
 void loop() {
   getData();
@@ -180,6 +179,7 @@ void getData() {
     }
   }  // end of com lost
 }  // end of void getData()
+
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true;             // if ButtonF is pressed, re-enable distance sensors
   if (buzzerEnabled) {                                // if the buzzer is enabled, check for horn button
@@ -259,6 +259,7 @@ void controlRobot() {
     }  // end of controlling motors (not servos)
   }    // end of void controlRobot()
 }
+
 void sendAckData() {
   if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
   if (M2dir == 0) M2speed = M2speed * -1;  // make M2speed negative if the direction is backwards
@@ -286,7 +287,6 @@ void sendAckData() {
   }
   Serial.print(F("]"));
 }
-
 
 void distances() {  // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
   dstTime = millis();
