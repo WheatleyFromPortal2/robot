@@ -88,7 +88,9 @@ void setup() {
     resetFunc(); // reset the Arduino
   }
   Servo1.attach(Svo1pin);
+  Servo1.write(0); // set servo to zero location
   Servo2.attach(Svo2pin);
+  Servo2.write(180); // set servo to zero location (reversed)
 // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();  // enables sending data back to transmitter
@@ -105,6 +107,17 @@ void setup() {
   for (int x = 2; x < 8; x++) { // set button values to 1(not pressed) using a for loop
     payload[x] = 1;
   }
+  digitalWrite(BUZZER, HIGH); // startup beeps
+  delay(50);
+  digitalWrite(BUZZER,LOW);
+  delay(50);
+  digitalWrite(BUZZER, HIGH);
+  delay(100);
+  digitalWrite(BUZZER, LOW);
+  delay(50);
+  digitalWrite(BUZZER, HIGH);
+  delay(150);
+  digitalWrite(BUZZER, LOW);
 } // end of void setup()
 
 void loop() {
@@ -142,7 +155,7 @@ void getData() {
         payload[x] = 1;
       }
       for (int x = 0; x < 3; x++) {  // beep 3 times quickly so user knows communication was lost
-        if (buzzerEnabled) {
+        if (buzzerEnabled && retry < 20) { // the buzzer is enabled, and we have not retried >20 times
           digitalWrite(BUZZER, HIGH);
           delay(100);
           digitalWrite(BUZZER, LOW);
@@ -174,7 +187,6 @@ void controlRobot() {
     }
     Servo1.write(Svo1pos); // write value to Servo 1
     Servo2.write(map(Svo2pos, 0, 180, 180, 0)); // write value to Servo 2, using map() to reverse it
-    
   } else {  // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) { // if the joystick is outside of the deadzones, run the motor control
       if (payload[6] == 1) S = payload[0] * 0.75; // if joyButton not pressed make turning speed only 3/4 of full, to make it more easy to control
