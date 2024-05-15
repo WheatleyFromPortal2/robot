@@ -14,26 +14,26 @@ You need to install the library titled "RF24" from the library manager.  "RF24" 
 #include <Servo.h>
 
 // ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
-byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  Must be between 0 and 83 to stay legal.  Must match on both transceivers.
+byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
 byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
-int const gfxInterval = 30;        // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
-int const llTime = 5;              // set Low Latency Mode wait to 5ms
+int const gfxInterval = 30;  // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
+int const llTime = 5; // set Low Latency Mode wait to 5ms
 // ---End matching vars---
 
 int const RF_CE = 9;
 int const RF_CSN = 10;
 int const Svo1Start = 0;
 int const Svo1End = 90;
-int const Svo2Start = 0;
+int const Svo2Start = 0; 
 int const Svo2End = 90;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t const address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
-int payload[8];                               // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
+int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
-int const BUZZER = 4;       // Active Buzzer on Pin4, does not require tone() command
-bool buzzerEnabled = true;  // Set to false if you think it's too loud
+int const BUZZER = 4; // Active Buzzer on Pin4, does not require tone() command
+bool buzzerEnabled = true; // Set to false if you think it's too loud
 // motor control io pin assignments
 int const M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
 int const M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is default
@@ -46,7 +46,7 @@ int M2speed = 0;  // variable holding speed of motor, value of 0-100
 
 bool M1dir = 1;
 bool M2dir = 1;
-bool doingLL = false;  // controls Low Latency Mode
+bool doingLL = false; // controls Low Latency Mode
 
 float S;
 float T;
@@ -57,12 +57,8 @@ float diff;
 // Hobby Servo io pin assignments
 int const Svo1pin = A0;
 int const Svo2pin = A1;
-int const Svo3pin = 18;
-int const Svo4pin = 19;
 Servo Servo1;  // create instance of servo
 Servo Servo2;  // create instance of servo
-//Servo Servo3; 
-//Servo Servo4;
 
 //---Distance Sensor Vars---
 int const trigger = 7;  // specify pin used to trigger distance sensors, connect this to all of them
@@ -89,19 +85,13 @@ void setup() {
   }
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding!"));
-    resetFunc();  // reset the Arduino
+    resetFunc(); // reset the Arduino
   }
   Servo1.attach(Svo1pin);
-  Servo1.write(0);  // set servo to zero location
   Servo2.attach(Svo2pin);
-  Servo2.write(180);  // set servo to zero location (reversed)
-  /*Servo3.attach(Svo3pin);
-  Servo3.write(0);  // set servo to zero location
-  Servo4.attach(Svo4pin);
-  Servo4.write(180);  // set servo to zero location (reversed)*/
-  // ---RF24 Initialization---
+// ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
-  radio.enableAckPayload();                                  // enables sending data back to transmitter
+  radio.enableAckPayload();  // enables sending data back to transmitter
   radio.setChannel(ChannelFrequency);                        // sets the frequency between 2,400mhz and 2,524mhz in 1mhz incriments
   radio.setPALevel(RF24_PA_MAX);                             // RF24_PA_MAX is default.
   radio.setPayloadSize(sizeof(payload));                     // set the payload size, must be < 32bytes
@@ -109,46 +99,30 @@ void setup() {
   radio.startListening();                                    // put radio in RX mode
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
 
-  pinMode(BUZZER, OUTPUT);       // set buzzer pin to output
-  payload[0] = 0;                // this code puts in default motor values for the payload, so it doesn't move erratically
-  payload[1] = 0;                // ^
-  for (int x = 2; x < 8; x++) {  // set button values to 1(not pressed) using a for loop
+  pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
+  payload[0] = 0;  // this code puts in default motor values for the payload, so it doesn't move erratically
+  payload[1] = 0;  // ^
+  for (int x = 2; x < 8; x++) { // set button values to 1(not pressed) using a for loop
     payload[x] = 1;
   }
-  digitalWrite(BUZZER, HIGH);  // startup beeps
-  delay(50);
-  digitalWrite(BUZZER, LOW);
-  delay(50);
-  digitalWrite(BUZZER, HIGH);
-  delay(100);
-  digitalWrite(BUZZER, LOW);
-  delay(50);
-  digitalWrite(BUZZER, HIGH);
-  delay(150);
-  digitalWrite(BUZZER, LOW);
-}  // end of void setup()
+} // end of void setup()
 
 void loop() {
   getData();
   controlRobot();
   sendAckData();
   //distances(); decided to remove dst sensors, as the scoop will get in the way
-  if (doingLL) delay(llTime);  // if using Low Latency mode, delay by llTIme
-  else delay(gfxInterval);     // otherwise,delay by gfxInterval
-}  // end of void loop()
+  if (doingLL) delay(llTime); // if using Low Latency mode, delay by llTIme
+  else delay(gfxInterval); // otherwise,delay by gfxInterval
+} // end of void loop()
 
 void getData() {
   uint8_t pipe;
   if (radio.available(&pipe)) {              // is there a payload? get the pipe number that recieved it
     uint8_t bytes = radio.getPayloadSize();  // get the size of the payload
     radio.read(&payload, bytes);             // fetch payload from FIFO(File In File Out)
-    if (payload[7] == 1) {
-      doingLL = true;
-      ackData[7] = 1;
-    }  // if payload[7] is equal to 1, engage Low Latency Mode and update ackData to show Txer it has been recieved
-    else
-      doingLL = false;
-    ackData[7] = 0;  // ^ if it isn't make doingLL false and update ackData as well
+    if (payload[7] == 1) {doingLL = true; ackData[7] = 1;} // if payload[7] is equal to 1, engage Low Latency Mode and update ackData to show Txer it has been recieved
+    else doingLL = false; ackData[7] = 0;// ^ if it isn't make doingLL false and update ackData as well
     Serial.print(F("Received "));
     Serial.print(bytes);  // print the size of the payload
     Serial.print(F(" bytes on pipe "));
@@ -164,11 +138,11 @@ void getData() {
     if (retry > 10) {
       payload[0] = 0;
       payload[1] = 0;
-      for (int x = 2; x < 8; x++) {  // make all buttons set to not pressed
+      for (int x = 2; x < 8; x++) { // make all buttons set to not pressed
         payload[x] = 1;
       }
-      for (int x = 0; x < 3; x++) {         // beep 3 times quickly so user knows communication was lost
-        if (buzzerEnabled && retry < 20) {  // the buzzer is enabled, and we have not retried >20 times
+      for (int x = 0; x < 3; x++) {  // beep 3 times quickly so user knows communication was lost
+        if (buzzerEnabled) {
           digitalWrite(BUZZER, HIGH);
           delay(100);
           digitalWrite(BUZZER, LOW);
@@ -177,90 +151,85 @@ void getData() {
       }
       resetFunc();  // reset the arduino so maybe it will regain communication
     }
-  }  // end of com lost
-}  // end of void getData()
-
+  } // end of com lost
+} // end of void getData()
 void controlRobot() {
-  if (payload[7] == 0) dstEnabled = true;             // if ButtonF is pressed, re-enable distance sensors
-  if (buzzerEnabled) {                                // if the buzzer is enabled, check for horn button
-    //if (payload[3] == 0) digitalWrite(BUZZER, HIGH);  // if ButtonB pressed and buzzer enabled, turn on horn
-    //else digitalWrite(BUZZER, LOW);
+  if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
+  if (buzzerEnabled) { // if the buzzer is enabled, check for horn button
+    if (payload[3] == 0) digitalWrite(BUZZER, HIGH); // if ButtonB pressed and buzzer enabled, turn on horn
+    else digitalWrite(BUZZER, LOW);
   }
-  /*if (payload[3] == 0) {
-    Servo3.write(0);  // write value to Servo 3
-    Servo4.write(map(0, 0, 180, 180, 0));
-  }
-  else {
-    Servo3.write(90);
-    Servo4.write(map(90, 0, 180, 180, 0));
-  }*/
-  if (payload[4] == 0) {
-    if (payload[2] == 0) {    // ButtonA is pressed, engage servo control
-      M1speed = 0;            // make motor speed zero when controlling servos
-      M2speed = 0;            // make motor speed zero when controlling servos
-      if (payload[5] == 0) {  // if ButtonD is pressed, do old method
-        // ---Old Servo control method---
-        Svo1pos = (payload[0] + 100) * 180 / 200;                  // Convert X(-100 to 100) to int from 0-180
-        if (payload[0] >= 99) Svo1pos = 180;                       // fix for weird behaviour
-        Svo2pos = (payload[1] + 100) * 180 / 200;                  // Convert Y(-100 to 100) to int from 0-180
-        if (payload[1] >= 99) Svo2pos = 180;                       // fix for weird behaviour // ButtonA is pressed, engage servo control
-      } else {                                                     // ---New Servo Control Method, for Scoop--- activated if ButtonD is not pressed
-        Svo1pos = map(payload[1], -100, 100, Svo1Start, Svo1End);  // map the Y(-100 to 100) to the Servo 1 Start and Servo1 End values
-        Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End);  // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
-      }
-      Servo1.write(Svo1pos);                                                // write value to Servo 1
-      Servo2.write(map(Svo2pos, 0, 180, 180, 0));                           // write value to Servo 2, using map() to reverse it
-    } else {                                                                // ButtonA isn't pressed, control motors instead
-      if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) {  // if the joystick is outside of the deadzones, run the motor control
-        if (payload[6] == 1) S = payload[0] * 0.75;                         // if joyButton not pressed make turning speed only 3/4 of full, to make it more easy to control
-        else S = payload[0];                                                // if it is pressed, don't adjust the turning speed
-        T = payload[1];                                                     // throttle = joystickY
-        //---Arcade Drive Math, adapted from <https://xiaoxiae.github.io/Robotics-Simplified-Website/drivetrain-control/arcade-drive/>---
-        maximum = max(abs(T), abs(S));
-        total = T + S;
-        diff = T - S;
-        if (T >= 0) {
-          if (S >= 0) {  // I quadrant
-            M1speed = maximum;
-            M2speed = diff;
-          } else {  // II quadrant
-            M1speed = total;
-            M2speed = maximum;
-          }
-        } else {
-          if (S >= 0) {  // IV quadrant
-            M1speed = total;
-            M2speed = maximum * -1;
-          } else {  // III quadrant
-            M1speed = maximum * -1;
-            M2speed = diff;
-          }
+  if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
+    M1speed = 0; // make motor speed zero when controlling servos
+    M2speed = 0; // make motor speed zero when controlling servos
+    if (payload[5] == 0) { // if ButtonD is pressed, do old method
+      // ---Old Servo control method---
+      Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
+      if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
+      Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
+      if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour // ButtonA is pressed, engage servo control
+    } else { // ---New Servo Control Method, for Scoop--- activated if ButtonD is not pressed
+      Svo1pos = map(payload[1], -100, 100, Svo1Start, Svo1End); // map the Y(-100 to 100) to the Servo 1 Start and Servo1 End values
+      Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End); // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
+    }
+    Servo1.write(Svo1pos); // write value to Servo 1
+    Servo2.write(map(Svo2pos, 0, 180, 180, 0)); // write value to Servo 2, using map() to reverse it
+    
+  } else {  // ButtonA isn't pressed, control motors instead
+    if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) { // if the joystick is outside of the deadzones, run the motor control
+      if (payload[6] == 1) S = payload[0] * 0.75; // if joyButton not pressed make turning speed only 3/4 of full, to make it more easy to control
+      else S = payload[0]; // if it is pressed, don't adjust the turning speed
+      T = payload[1]; // throttle = joystickY
+      //---Arcade Drive Math, adapted from <https://xiaoxiae.github.io/Robotics-Simplified-Website/drivetrain-control/arcade-drive/>---
+      maximum = max(abs(T), abs(S));
+      total = T + S;
+      diff = T - S;
+      if (T >= 0){
+        if (S >= 0){ // I quadrant
+          M1speed = maximum;
+          M2speed = diff;
         }
-        if (M1speed < 0) {  // calculate direction based off of value of M1speed
-          M1speed *= -1;
-          M1dir = 1;
-        } else M1dir = 0;
-        if (M2speed < 0) {  // calculate direction based off of value of M2speed
-          M2speed *= -1;
-          M2dir = 1;
-        } else M2dir = 0;
-        Serial.println("M1Speed: ");
-        Serial.print(M1speed);
-        Serial.println("M2Speed: ");
-        Serial.print(M2speed);
-        digitalWrite(M1dirPin, M1dir);
-        digitalWrite(M2dirPin, M2dir);
-        analogWrite(M1pwmPin, M1speed * 2.54);
-        analogWrite(M2pwmPin, M2speed * 2.54);
-      } else {  // set both motors to zero, if X&Y are within deadzone
-        analogWrite(M1pwmPin, 0);
-        analogWrite(M2pwmPin, 0);
-        M1speed = 0;
-        M2speed = 0;
+        else { // II quadrant
+          M1speed = total;
+          M2speed = maximum;
+        }
       }
-    }  // end of controlling motors (not servos)
-  }    // end of void controlRobot()
-}
+      else {
+        if (S >= 0){ // IV quadrant
+          M1speed = total;
+          M2speed = maximum * -1;
+        }
+        else { // III quadrant
+          M1speed = maximum * -1;
+          M2speed = diff;
+        }
+      }
+      if (M1speed < 0){ // calculate direction based off of value of M1speed
+        M1speed *= -1;
+        M1dir = 1;
+      }
+      else M1dir = 0;
+      if (M2speed < 0){ // calculate direction based off of value of M2speed
+        M2speed *= -1;
+        M2dir = 1;
+      }
+      else M2dir = 0;
+      Serial.println("M1Speed: ");
+      Serial.print(M1speed);
+      Serial.println("M2Speed: ");
+      Serial.print(M2speed);
+      digitalWrite(M1dirPin, M1dir);
+      digitalWrite(M2dirPin, M2dir);
+      analogWrite(M1pwmPin, M1speed*2.54);
+      analogWrite(M2pwmPin, M2speed*2.54);
+    } else {  // set both motors to zero, if X&Y are within deadzone
+      analogWrite(M1pwmPin, 0);
+      analogWrite(M2pwmPin, 0);
+      M1speed = 0;
+      M2speed = 0;
+    }
+  } // end of controlling motors (not servos)
+} // end of void controlRobot()
 
 void sendAckData() {
   if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
@@ -271,7 +240,7 @@ void sendAckData() {
   if (M2speed > 100) M2speed = 100;
   if (M2speed < -100) M2speed = -100;
   Svo1pos = Servo1.read();
-  Svo2pos = map(Servo2.read(), 0, 180, 180, 0);  // using map() to reverse servo to align with writes, as it is mounted backwards
+  Svo2pos = map(Servo2.read(), 0, 180, 180, 0); // using map() to reverse servo to align with writes, as it is mounted backwards
   if (Svo1pos > 180) Svo1pos = 180;
   if (Svo1pos < 0) Svo1pos = 0;
   if (Svo2pos > 180) Svo2pos = 180;
@@ -283,16 +252,16 @@ void sendAckData() {
   Serial.println(F(""));
   Serial.print(F("Writing ackData["));
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // load the payload for the next time
-  for (int i = 0; i <= 7; i++) {                             // print ackData to Serial
-    Serial.print(ackData[i]);
-    if (i != 7) Serial.print(F(","));  // if it is not the last index, print a comma
+  for (int i = 0; i <= 7; i++) { // print ackData to Serial
+      Serial.print(ackData[i]);
+      if (i != 7) Serial.print(F(",")); // if it is not the last index, print a comma
   }
   Serial.print(F("]"));
 }
 
 void distances() {  // Calculate distances from distance sensors and put into ackData; yes, I know a for loop would be better, but I haven't figured out how to that with 3 different variables
   dstTime = millis();
-  if (dstEnabled) {
+  if (dstEnabled){
     //digitalWrite(trigger, HIGH); // trigger the HC-SR04s
     //delayMicroseconds(10); // give enough time for the HC-SR04s to detect the trigger
     //digitalWrite(trigger, LOW); // un-trigger the HC-SR04s
@@ -311,12 +280,13 @@ void distances() {  // Calculate distances from distance sensors and put into ac
   }
   dstTime = millis() - dstTime;
   //ackData[7] = dstTime; // no longer needed, no more distance sensors
-  if (doingLL) delay(llTime);  // if in Low Latency Mode, wait llTIme
+  if (doingLL) delay(llTime); // if in Low Latency Mode, wait llTIme
   else {
     if (dstTime > gfxInterval) {
-      dstEnabled = false;  // if the time is greater than gfxInterval ms, disable distance sensors
-      Serial.print(F("DISTANCE SENSORS DISABLED"));
-    } else {  // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
+    dstEnabled = false; // if the time is greater than gfxInterval ms, disable distance sensors
+    Serial.print(F("DISTANCE SENSORS DISABLED"));
+    }
+    else { // if the dstTime is normal, wait gfxInterval ms accounting for the time the distance sensor takes
       if (dstEnabled) delay(gfxInterval - dstTime);
       else delay(gfxInterval - 5);
     }
