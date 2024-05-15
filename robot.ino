@@ -14,7 +14,7 @@ You need to install the library titled "RF24" from the library manager.  "RF24" 
 #include <Servo.h>
 
 // ---THESE VARIABLES MUST MATCH ON TRANSMITTER AND ROBOT---
-byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  MUst be between 0 and 83 to stay legal.  Must match on both transceivers.
+byte const ChannelFrequency = 24;  // !!! Frequency used by transmitter = 2,400mhz + ChannelFrequency.  Must be between 0 and 124 to work.  Must be between 0 and 83 to stay legal.  Must match on both transceivers.
 byte const RFpipe = 0;             // !!! This is the pipe used to receive data.  Choose a number between 0 and 15.  Must match on both transceivers.
 int const gfxInterval = 30;        // interval to wait for graphics update, VERY SENSITIVE. Affects input delay greatly
 int const llTime = 5;              // set Low Latency Mode wait to 5ms
@@ -61,8 +61,8 @@ int const Svo3pin = 18;
 int const Svo4pin = 19;
 Servo Servo1;  // create instance of servo
 Servo Servo2;  // create instance of servo
-Servo Servo3;
-Servo Servo4;
+//Servo Servo3; 
+//Servo Servo4;
 
 //---Distance Sensor Vars---
 int const trigger = 7;  // specify pin used to trigger distance sensors, connect this to all of them
@@ -95,10 +95,10 @@ void setup() {
   Servo1.write(0);  // set servo to zero location
   Servo2.attach(Svo2pin);
   Servo2.write(180);  // set servo to zero location (reversed)
-  Servo3.attach(Svo3pin);
+  /*Servo3.attach(Svo3pin);
   Servo3.write(0);  // set servo to zero location
   Servo4.attach(Svo4pin);
-  Servo4.write(180);  // set servo to zer location (reversed)
+  Servo4.write(180);  // set servo to zero location (reversed)*/
   // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();                                  // enables sending data back to transmitter
@@ -183,16 +183,18 @@ void getData() {
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true;             // if ButtonF is pressed, re-enable distance sensors
   if (buzzerEnabled) {                                // if the buzzer is enabled, check for horn button
-    if (payload[3] == 0) digitalWrite(BUZZER, HIGH);  // if ButtonB pressed and buzzer enabled, turn on horn
-    else digitalWrite(BUZZER, LOW);
+    //if (payload[3] == 0) digitalWrite(BUZZER, HIGH);  // if ButtonB pressed and buzzer enabled, turn on horn
+    //else digitalWrite(BUZZER, LOW);
   }
-  if (payload[3] == 0) {
+  /*if (payload[3] == 0) {
     Servo3.write(0);  // write value to Servo 3
     Servo4.write(map(0, 0, 180, 180, 0));
   }
-  if (payload[4] == 0) {
+  else {
     Servo3.write(90);
     Servo4.write(map(90, 0, 180, 180, 0));
+  }*/
+  if (payload[4] == 0) {
     if (payload[2] == 0) {    // ButtonA is pressed, engage servo control
       M1speed = 0;            // make motor speed zero when controlling servos
       M2speed = 0;            // make motor speed zero when controlling servos
