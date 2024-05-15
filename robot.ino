@@ -75,8 +75,8 @@ long unsigned int dstTime;
 bool dstEnabled = false;
 long pulseDuration;
 int retry = 0;  // used for disabling motors if robot is disconnected for long enough
-int Svo1pos = 0;
-int Svo2pos = 0;
+int scoopPos = 0;
+int scoopRot = 0;
 int const deadzone = 5;  // set deadzone to 5
 
 void (*resetFunc)(void) = 0;  // declare reset function at address 0
@@ -177,20 +177,16 @@ void controlRobot() {
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
     M2speed = 0; // make motor speed zero when controlling servos
-    if (payload[5] == 0) { // if ButtonD is pressed, do old method
-      // ---Old Servo control method---
-      Svo1pos = (payload[0] + 100) * 180 / 200;  // Convert X(-100 to 100) to int from 0-180
-      if (payload[0] >= 99) Svo1pos = 180;       // fix for weird behaviour
-      Svo2pos = (payload[1] + 100) * 180 / 200;  // Convert Y(-100 to 100) to int from 0-180
-      if (payload[1] >= 99) Svo2pos = 180;       // fix for weird behaviour // ButtonA is pressed, engage servo control
-    } else { // ---New Servo Control Method, for Scoop--- activated if ButtonD is not pressed
-      Svo1pos = map(payload[1], -100, 100, Svo1Start, Svo1End); // map the Y(-100 to 100) to the Servo 1 Start and Servo1 End values
-      Svo2pos = map(payload[1], -100, 100, Svo2Start, Svo2End); // map the Y(-100 to 100) to the Servo 2 Start and Servo2 End values
-    }
-    Servo1.write(Svo1pos); // write value to Servo 1
-    Servo2.write(map(Svo2pos, 0, 180, 180, 0)); // write value to Servo 2, using map() to reverse it
-    
-  } else {  // ButtonA isn't pressed, control motors instead
+    //---Calculate Values---
+    scoopPos = map(payload[0], -100, 100, 0, 180);  // Convert X(-100 to 100) to int from 0-180
+    scoopRot = map(payload[1], -100, 100, 0, 180); //  Convert Y(-100 to 100) to int from 0-180
+    //---Write Values to Servos--- 
+    Servo1.write(scoopPos); // write value to Servo 1
+    Servo2.write(map(scoopPos, 0, 180, 180, 0)); // write value to Servo 2, using map() to reverse it
+    Servo3.write(scoopRot); // write scoop rotation to Servo 3
+    Servo4.write(map(scoopRot, 0, 180, 180, 0)); // write scoop rotation to Servo4, using map() to reverse it    
+  } 
+  else {  // ButtonA isn't pressed, control motors instead
     if (!(abs(payload[0]) <= deadzone && abs(payload[1]) <= deadzone)) { // if the joystick is outside of the deadzones, run the motor control
       if (payload[6] == 1) S = payload[0] * 0.75; // if joyButton not pressed make turning speed only 3/4 of full, to make it more easy to control
       else S = payload[0]; // if it is pressed, don't adjust the turning speed
