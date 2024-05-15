@@ -109,6 +109,6 @@ Since the arduino uno has hardware PWM on pins `3, 5, 6, 9, 10, 11` we can use t
 2. <del>`x1` Distance value for leftmost distance sensor (centimeters)</del>
 3. <del>`x2` Distance value for middle distance sensor (centimeters)</del>
 4. <del>`x3` Distance value for rightmost distance sensor (centimeters)</del>
-5. `servo1` Rotation of leftmost servo (degrees)
-6. `servo2` Rotation of rightmost servo (degrees)
+5. `scoopPos` Rotation of the scoop arms up/down (uses big servos attached to robot)
+6. `scoopRot` Rotation of scoop bucket (uses tiny servos)
 7. Whether doingLL is true `0-1`(`1` is engaged)

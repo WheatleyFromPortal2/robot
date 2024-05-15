@@ -225,9 +225,7 @@ void PrintToLCD() {
       u8g2.print(txPercent);
       u8g2.print(F("%"));
       //u8g2.setCursor(0, 38);
-    } else if (vScreen == 1) {
-      // this displays a bar graph (most likely motor speed)//*
-      //u8g2.clearDisplay();
+    } else if (vScreen == 1) { // this vScreen displays the motor graphs and servo gauges
       int graphH1 = abs(ackData[0]) * .48;
       int graphH2 = abs(ackData[1]) * .48;
       u8g2.drawFrame(0, 12, 12, 52);
@@ -290,7 +288,7 @@ void PrintToLCD() {
       u8g2.print(txPercent);
       u8g2.print(F("%"));
     }
-    /* comment out proximity vScreen, it is no lonnger needed
+    /* comment out proximity vScreen, it is no longer needed
     else if (vScreen == 2) {
       // this displays the proximity data
       u8g2.drawEllipse(64, 63, 60, 54, U8G2_DRAW_UPPER_RIGHT | U8G2_DRAW_UPPER_LEFT);

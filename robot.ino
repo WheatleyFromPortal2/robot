@@ -20,19 +20,23 @@ int const gfxInterval = 30;  // interval to wait for graphics update, VERY SENSI
 int const llTime = 5; // set Low Latency Mode wait to 5ms
 // ---End matching vars---
 
-int const RF_CE = 9;
-int const RF_CSN = 10;
+int scoopPos = 0; // the current position of the scoop up/down (uses the big servos attached to the robot)
+int scoopRot = 0; // the current positino of the scoop rotation (uses the small servos attached to the arms)
 int const Svo1Start = 0;
 int const Svo1End = 90;
 int const Svo2Start = 0; 
 int const Svo2End = 0;
-int const Svo3Start = 90;
+int const Svo3Start = 0;
+int const Svo3End = 90;
 int const Svo4Start = 0;
 int const Svo4End = 90;
+
+int const RF_CE = 9; // Pin for enabling RF24
+int const RF_CSN = 10; // Pin for selecting Tx/Rx on RF24
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t const address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
-int payload[8];                                     // array to hold received data.  See transmitter code to view which array elements contain analog and digitial button data.
+int payload[8] = {0, 0, 1, 1, 1, 1, 1, 0}; // array for holding recieved data, these are default values so the motors/servos don't move until we recieve a real transmission
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
 int const BUZZER = 4; // Active Buzzer on Pin4, does not require tone() command
@@ -60,8 +64,8 @@ float diff;
 // Hobby Servo io pin assignments
 int const Svo1pin = A0;
 int const Svo2pin = A1;
-int const Svo3pin = 18;
-int const Svo4pin = 19;
+int const Svo3pin = 18; // pin A4
+int const Svo4pin = 19; // pin A5
 Servo Servo1;  // create instance of servo
 Servo Servo2;  // create instance of servo
 Servo Servo3;
@@ -75,8 +79,7 @@ long unsigned int dstTime;
 bool dstEnabled = false;
 long pulseDuration;
 int retry = 0;  // used for disabling motors if robot is disconnected for long enough
-int scoopPos = 0;
-int scoopRot = 0;
+
 int const deadzone = 5;  // set deadzone to 5
 
 void (*resetFunc)(void) = 0;  // declare reset function at address 0
@@ -106,13 +109,7 @@ void setup() {
   radio.openReadingPipe(RFpipe, address[RFpipe]);            // open the pipe for reading from the radio
   radio.startListening();                                    // put radio in RX mode
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
-
   pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
-  payload[0] = 0;  // this code puts in default motor values for the payload, so it doesn't move erratically
-  payload[1] = 0;  // ^
-  for (int x = 2; x < 8; x++) { // set button values to 1(not pressed) using a for loop
-    payload[x] = 1;
-  }
 } // end of void setup()
 
 void loop() {
@@ -160,7 +157,8 @@ void getData() {
       resetFunc();  // reset the arduino so maybe it will regain communication
     }
   } // end of com lost
-} // end of void getData()
+} // end of void getData()\
+
 void controlRobot() {
   if (payload[7] == 0) dstEnabled = true; // if ButtonF is pressed, re-enable distance sensors
   if (buzzerEnabled) { // if the buzzer is enabled, check for horn button
@@ -246,20 +244,16 @@ void sendAckData() {
   if (M1dir == 0) M1speed = M1speed * -1;  // make M1speed negative if the direction is backwards
   if (M2dir == 0) M2speed = M2speed * -1;  // make M2speed negative if the direction is backwards
   // sanitize ackData, because of floating point math errors
-  if (M1speed > 100) M1speed = 100;
+  /*if (M1speed > 100) M1speed = 100;
   if (M1speed < -100) M1speed = -100;
   if (M2speed > 100) M2speed = 100;
   if (M2speed < -100) M2speed = -100;
-  Svo1pos = Servo1.read();
-  Svo2pos = map(Servo2.read(), 0, 180, 180, 0); // using map() to reverse servo to align with writes, as it is mounted backwards
-  if (Svo1pos > 180) Svo1pos = 180;
-  if (Svo1pos < 0) Svo1pos = 0;
   if (Svo2pos > 180) Svo2pos = 180;
-  if (Svo2pos < 0) Svo2pos = 0;
+  if (Svo2pos < 0) Svo2pos = 0;*/
   ackData[0] = M1speed;
   ackData[1] = M2speed;
-  ackData[5] = Svo1pos;
-  ackData[6] = Svo2pos;
+  ackData[5] = scoopPos;
+  ackData[6] = scoopRot;
   Serial.println(F(""));
   Serial.print(F("Writing ackData["));
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // load the payload for the next time
