@@ -25,7 +25,10 @@ int const RF_CSN = 10;
 int const Svo1Start = 0;
 int const Svo1End = 90;
 int const Svo2Start = 0; 
-int const Svo2End = 90;
+int const Svo2End = 0;
+int const Svo3Start = 90;
+int const Svo4Start = 0;
+int const Svo4End = 90;
 RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN pin.  9 and 10 for joystick board
 
 uint8_t const address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
@@ -57,9 +60,12 @@ float diff;
 // Hobby Servo io pin assignments
 int const Svo1pin = A0;
 int const Svo2pin = A1;
+int const Svo3pin = 18;
+int const Svo4pin = 19;
 Servo Servo1;  // create instance of servo
 Servo Servo2;  // create instance of servo
-
+Servo Servo3;
+Servo Servo4;
 //---Distance Sensor Vars---
 int const trigger = 7;  // specify pin used to trigger distance sensors, connect this to all of them
 int const x1Pin = -1;   // Pin for leftmost distance sensor echo
@@ -87,8 +93,10 @@ void setup() {
     Serial.println(F("radio hardware is not responding!"));
     resetFunc(); // reset the Arduino
   }
-  Servo1.attach(Svo1pin);
+  Servo1.attach(Svo1pin); // attach Servo1 to Svo1pin
   Servo2.attach(Svo2pin);
+  Servo3.attach(Svo3pin);
+  Servo4.attach(Svo4pin);
 // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();  // enables sending data back to transmitter
@@ -158,6 +166,13 @@ void controlRobot() {
   if (buzzerEnabled) { // if the buzzer is enabled, check for horn button
     if (payload[3] == 0) digitalWrite(BUZZER, HIGH); // if ButtonB pressed and buzzer enabled, turn on horn
     else digitalWrite(BUZZER, LOW);
+  }
+  if (payload[4] == 0) { // button is pressed, engage scoop servo control
+    Servo3.write(Svo3End);
+    Servo4.write(Svo4End);
+  } else { // button is not pressed, go to normal position
+    Servo3.write(Svo3Start);
+    Servo3.write(Svo4End);
   }
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
