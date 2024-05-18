@@ -40,7 +40,7 @@ int payload[8] = {0, 0, 1, 1, 1, 1, 1, 0}; // array for holding recieved data, t
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
 
 int const BUZZER = 4; // Active Buzzer on Pin4, does not require tone() command
-bool buzzerEnabled = true; // Set to false if you think it's too loud
+bool buzzerEnabled = false; // Set to false if you think it's too loud
 // motor control io pin assignments
 int const M1pwmPin = 5;  //IOpin assignment, enable for motor1 (pwm on this pin). IO pin10 is default, but changed to leave SPI port available
 int const M1dirPin = 3;  //IOpin assignment, direction for motor1.  IO pin12 is default
@@ -92,8 +92,10 @@ void setup() {
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
   }
+  Serial.println(F("-------Welcome to the Robot Serial------"));
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding!"));
+    delay(1000);
     resetFunc(); // reset the Arduino
   }
   Servo1.attach(Svo1pin); // attach Servo1 to Svo1pin
