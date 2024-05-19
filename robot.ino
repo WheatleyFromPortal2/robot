@@ -101,7 +101,9 @@ void setup() {
   Servo1.attach(Svo1pin); // attach Servo1 to Svo1pin
   Servo2.attach(Svo2pin);
   Servo3.attach(Svo3pin);
+  //Servo3.write(Svo3Start);
   Servo4.attach(Svo4pin);
+  Servo4.write(map(Svo4Start, 0, 180, 180, 0)); // set Servo4 to starting position, accounting for rotation difference
 // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();  // enables sending data back to transmitter
