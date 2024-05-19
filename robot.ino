@@ -27,9 +27,9 @@ int const Svo1End = 90;
 int const Svo2Start = 0; 
 int const Svo2End = 0;
 int const Svo3Start = 0;
-int const Svo3End = 90;
-int const Svo4Start = 0;
-int const Svo4End = 90;
+int const Svo3End = 180;
+int const Svo4Start = 180;
+int const Svo4End = 0;
 
 int const RF_CE = 9; // Pin for enabling RF24
 int const RF_CSN = 10; // Pin for selecting Tx/Rx on RF24
@@ -38,6 +38,7 @@ RF24 radio(RF_CE, RF_CSN);  // using pin 7 for the CE pin, and pin 8 for the CSN
 uint8_t const address[][16] = { "1Node", "2Node", "3Node", "4Node", "5Node", "6Node", "7Node", "8Node", "9Node", "10Node", "11Node", "12Node", "13Node", "14Node", "15Node", "16Node" };
 int payload[8] = {0, 0, 1, 1, 1, 1, 1, 0}; // array for holding recieved data, these are default values so the motors/servos don't move until we recieve a real transmission
 int ackData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };  // the two values to send back to the remote, just using 0's for example
+int msg, code, amount; // vars for Serial input
 
 int const BUZZER = 4; // Active Buzzer on Pin4, does not require tone() command
 bool buzzerEnabled = false; // Set to false if you think it's too loud
@@ -101,9 +102,9 @@ void setup() {
   Servo1.attach(Svo1pin); // attach Servo1 to Svo1pin
   Servo2.attach(Svo2pin);
   Servo3.attach(Svo3pin);
-  //Servo3.write(Svo3Start);
+  Servo3.write(Svo3Start);
   Servo4.attach(Svo4pin);
-  Servo4.write(map(Svo4Start, 0, 180, 180, 0)); // set Servo4 to starting position, accounting for rotation difference
+  Servo4.write(Svo3Start); // set Servo4 to starting position
 // ---RF24 Initialization---
   radio.setDataRate(RF24_250KBPS);
   radio.enableAckPayload();  // enables sending data back to transmitter
@@ -115,10 +116,36 @@ void setup() {
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // pre-load data
   pinMode(BUZZER, OUTPUT);                                   // set buzzer pin to output
 } // end of void setup()
-
+void processInput() {
+  msg = Serial.parseInt();
+  code = msg/1000; // get the first digit
+  amount = msg - (code*1000); // get the last three digits
+  Serial.println(F("Control Code: "));
+  Serial.println(amount);
+  switch (code) {
+    case 1:
+      Serial.println(F("Controlling Motors"));
+      payload[0] = 100;
+      payload[1] = 100;
+      controlRobot();
+    case 2:
+      Serial.println(F("Controlling Scoop Arms"));
+      if (amount <= 180 && amount >= 0) { // check that "amount" is within limits
+        Servo1.write(amount);
+        Servo2.write(map(amount, 0, 180, 180, 0)); // reverse "amount"
+      }
+    case 3:
+      Serial.println(F("Controlling Scoop"));
+      if (amount <= 180 && amount >= 0) {
+        Servo3.write(map(amount, 0, 180, Svo3Start, Svo3End));
+        Servo4.write(map(amount, 0, 180, Svo4Start, Svo4End)); // reverse "amount"
+      }
+  }
+}
 void loop() {
   getData();
-  controlRobot();
+  if (Serial.available()) processInput(); // if there is a serial message available, process the input
+  else controlRobot();
   sendAckData();
   //distances(); decided to remove dst sensors, as the scoop will get in the way
   if (doingLL) delay(llTime); // if using Low Latency mode, delay by llTIme
@@ -158,7 +185,7 @@ void getData() {
           delay(100);
         }
       }
-      resetFunc();  // reset the arduino so maybe it will regain communication
+      //resetFunc();  // reset the arduino so maybe it will regain communication
     }
   } // end of com lost
 } // end of void getData()\
@@ -174,7 +201,7 @@ void controlRobot() {
     Servo4.write(Svo4End);
   } else { // button is not pressed, go to normal position
     Servo3.write(Svo3Start);
-    Servo3.write(Svo4End);
+    Servo4.write(Svo4Start);
   }
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
