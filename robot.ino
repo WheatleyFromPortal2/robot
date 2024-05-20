@@ -201,8 +201,8 @@ void controlRobot() {
     Servo3.write(Svo3End);
     Servo4.write(Svo4End);
   } else { // button is not pressed, go to normal position
-    Servo3.write(Svo3Start);
-    Servo4.write(Svo4Start);
+    //Servo3.write(Svo3Start);
+    //Servo4.write(Svo4Start);
   }
   if (payload[2] == 0) {                  // ButtonA is pressed, engage servo control
     M1speed = 0; // make motor speed zero when controlling servos
