@@ -142,6 +142,7 @@ void processInput() {
       }
   }
 }
+
 void loop() {
   getData();
   if (Serial.available()) processInput(); // if there is a serial message available, process the input
@@ -283,8 +284,10 @@ void sendAckData() {
   if (Svo2pos < 0) Svo2pos = 0;*/
   ackData[0] = M1speed;
   ackData[1] = M2speed;
-  ackData[5] = scoopPos;
-  ackData[6] = scoopRot;
+  //ackData[5] = scoopPos;
+  ackData[5] = Servo1.read();
+  //ackData[6] = scoopRot;
+  ackData[6] = Servo3.read();
   Serial.println(F(""));
   Serial.print(F("Writing ackData["));
   radio.writeAckPayload(RFpipe, &ackData, sizeof(ackData));  // load the payload for the next time

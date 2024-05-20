@@ -64,6 +64,7 @@ bool lastTxSuccess;
 bool lastRxSuccess;
 float txPercent;
 int vScreen = 1; // Variable controls what screen is printed to the display (can be 0 or 1 normally). I don't recommend to change it, 1 is the best vScreen
+
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
@@ -139,6 +140,7 @@ void readButtons() {
     else payload[7] = 0; vScreen = 1; // ^ or else make doingLL = 0 and set vScreen back to normal
   }
 } // end of void readButtons()
+
 void send() {
   bool report = radio.write(&payload, sizeof(payload));  // transmit the data and receive confirmation report
 
